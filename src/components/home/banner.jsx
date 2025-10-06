@@ -27,27 +27,29 @@ function Banner() {
 
   return (
     <>
-      <div className="w-[100vw] h-96 md:h-90  top-15 relative overflow-hidden text-white">
+      <div className="w-full h-[40vh] sm:h-[60vh] md:h-[70vh] lg:h-[80vh] xl:h-[56vh] relative  text-white">
         {images.map((img, i) => (
           <Image
             src={img.image}
             key={i}
             alt="Aviation banner image"
             fill
-            className={`object-cover  transition-opacity duration-3000 ${
+            className={`object-cover transition-opacity duration-3000 ${
               i === currentImage ? "opacity-100" : "opacity-0"
             }`}
             priority={i === 0}
           />
         ))}
-        <div className=" z-10 absolute inset-0 items-center flex bg-black/40 justify-center flex-col gap-5 ">
-          <h1 className="md:text-5xl font-bold">
-            Explore the World with SkyRoute
-          </h1>
-          <p className="md:text-xl">
-            Find the best flights and destinations for your next adventure.
-          </p>
-          <Searchbar />
+        <div className="z-10 absolute inset-0 flex items-center justify-center bg-black/40">
+          <div className="flex flex-col items-center justify-center gap-3 sm:gap-4 md:gap-5 lg:gap-6 px-4 sm:px-6 md:px-8 text-center max-w-6xl mx-auto">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
+              Explore the World with SkyRoute
+            </h1>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl opacity-90 max-w-2xl leading-relaxed">
+              Find the best flights and destinations for your next adventure.
+            </p>
+            <Searchbar  />
+          </div>
         </div>
       </div>
     </>
