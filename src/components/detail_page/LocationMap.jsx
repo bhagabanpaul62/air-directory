@@ -1,12 +1,20 @@
 import React from "react";
 
-function LocationMap({ Latitude, Longitude, Name, Address }) {
+function LocationMap({
+  Latitude,
+  Longitude,
+  Name,
+  Address,
+  Phone,
+  Email,
+  Country,
+}) {
   // If no coordinates are provided, show placeholder
   if (!Latitude || !Longitude) {
     return (
       <div className="p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">
-          Location & Map
+           Location & Map
         </h3>
         <div className="bg-gray-100 rounded-xl p-8 text-center">
           <svg
@@ -46,15 +54,26 @@ function LocationMap({ Latitude, Longitude, Name, Address }) {
 
   return (
     <div className="p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Location & Map</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">
+        {Country} Headquarter Information
+      </h3>
 
       {/* Address Information */}
-      {Address && (
-        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">Address</p>
-          <p className="text-gray-900 text-sm font-medium">{Address}</p>
-        </div>
-      )}
+
+      <div className="flex justify-center gap-4">
+        {Phone && (
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg w-[50%]">
+            <p className="text-sm text-gray-600">Toll-Free-Number</p>
+            <p className="text-gray-900 text-sm font-medium">{Phone}</p>
+          </div>
+        )}
+        {Email && (
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg  w-[50%]">
+            <p className="text-sm text-gray-600">Email</p>
+            <p className="text-gray-900 text-sm font-medium">{Email}</p>
+          </div>
+        )}
+      </div>
 
       {/* Coordinates */}
       <div className="mb-4 grid grid-cols-2 gap-3">

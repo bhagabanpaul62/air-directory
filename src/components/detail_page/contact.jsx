@@ -4,7 +4,7 @@ function Contact({ Phone, Email, Address, Website }) {
   return (
     <div className="p-6">
       <h3 className="text-lg font-medium text-gray-900 mb-4">
-        Contact Information
+        Primary Contact Information
       </h3>
       <div className="space-y-2 text-sm">
         {Website && (
@@ -21,16 +21,11 @@ function Contact({ Phone, Email, Address, Website }) {
         )}
         {Phone && (
           <div>
-            <span className="text-gray-600">Phone</span>
+            <span className="text-gray-600">Toll-Free-Helpline</span>
             <p className="text-gray-900">{Phone}</p>
           </div>
         )}
-        {Address && (
-          <div>
-            <span className="text-gray-600">Address</span>
-            <p className="text-gray-900">{Address}</p>
-          </div>
-        )}
+        
       </div>
     </div>
   );

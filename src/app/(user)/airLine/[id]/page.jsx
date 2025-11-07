@@ -79,18 +79,9 @@ async function Page({ params }) {
                 Longitude={data.Longitude}
                 Name={data.Name}
                 Address={data.Address}
-              />
-            </div>
-
-            {/* Social Links */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <SocialLink
-                Website={data.Website}
-                youtube={data.YouTube}
-                Facebook={data.Facebook}
-                Instagram={data.Instagram}
-                LinkedIn={data.LinkedIn}
-                x={data.X}
+                Phone={data.Phone}
+                Email={data.Email}
+                Country={data.Country}
               />
             </div>
           </div>
@@ -117,16 +108,15 @@ async function Page({ params }) {
                 Website={data.Website}
               />
             </div>
-
-            {/* Metadata */}
+            {/* Social Links */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <MetaData
-                Continent={data.Continent}
-                Country={data.Country}
-                Region={data.Region}
-                City={data.City}
-                Latitude={data.Latitude}
-                Longitude={data.Longitude}
+              <SocialLink
+                Website={data.Website}
+                youtube={data.YouTube}
+                Facebook={data.Facebook}
+                Instagram={data.Instagram}
+                LinkedIn={data.LinkedIn}
+                x={data.X}
               />
             </div>
           </div>
@@ -135,7 +125,7 @@ async function Page({ params }) {
           {/* //other airports same continents cord */}
           <Recommendation
             data={data}
-            text={"other airports"}
+            text={"airlines office in other location"}
             type={"Airline"}
             api={"airLine"}
           />

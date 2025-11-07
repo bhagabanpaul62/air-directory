@@ -58,7 +58,7 @@ function Recommendation({ data, text, type, api, itemsPerPage = 8 }) {
       {/* Section Header */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-          {text} in {data.Country}
+          {data.Country} {text}
         </h2>
         <div className="w-20 h-1 bg-blue-600 rounded-full"></div>
       </div>
