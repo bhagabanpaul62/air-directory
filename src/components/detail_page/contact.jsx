@@ -8,9 +8,9 @@ function Contact({ Phone, Email, Address, Website }) {
       </h3>
       <div className="space-y-2 text-sm">
         {Website && (
-          <div>
-            <span className="text-gray-600">Website</span>
-            <p className="text-gray-900">{Website}</p>
+          <div className="flex-col">
+            <span className="text-gray-600 block">Website</span>
+            <a target="blank" href={Website} className="text-gray-900 block">{Website}</a>
           </div>
         )}
         {Email && (
