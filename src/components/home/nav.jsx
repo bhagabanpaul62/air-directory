@@ -246,7 +246,7 @@ const Nav = () => {
     { href: "/directory", label: "Directory" },
     { href: "/airlines", label: "Airlines", hasDropdown: true },
     { href: "/airports", label: "Airports", hasDropdown: true },
-    
+    { href: "/offices", label: "Offices", hasDropdown: true },
   ];
 
   // Dropdown handlers
