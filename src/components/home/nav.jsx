@@ -243,6 +243,7 @@ const Nav = () => {
   // Navigation items configuration
   const navItems = [
     { href: "/", label: "Home", exact: true },
+    { href: "/sitemap", label: "Sitemap" },
     { href: "/directory", label: "Directory" },
     { href: "/airlines", label: "Airlines", hasDropdown: true },
     { href: "/airports", label: "Airports", hasDropdown: true },
@@ -619,7 +620,9 @@ const Nav = () => {
                                 3.{" "}
                                 {item.label.toLowerCase() === "airlines"
                                   ? "Cities & Airlines"
-                                  : "Cities & Airports"}
+                                  : item.label.toLowerCase() === "airports"
+                                  ? "Cities & Airports"
+                                  : "Cities & Offices"}
                               </h3>
                             </div>
                             <div className="p-2 max-h-48 lg:max-h-64 overflow-y-auto">
@@ -671,12 +674,15 @@ const Nav = () => {
                                     </div>
                                   </div>
 
-                                  {/* Airlines/Airports */}
+                                  {/* Airlines/Airports/Offices */}
                                   <div>
                                     <h4 className="text-xs font-medium text-gray-500 mb-2 px-2 lg:px-3">
                                       {item.label.toLowerCase() === "airlines"
                                         ? "AIRLINES"
-                                        : "AIRPORTS"}
+                                        : item.label.toLowerCase() ===
+                                          "airports"
+                                        ? "AIRPORTS"
+                                        : "OFFICES"}
                                     </h4>
                                     <div className="space-y-1">
                                       {(() => {
@@ -686,7 +692,10 @@ const Nav = () => {
                                           ? item.label.toLowerCase() ===
                                             "airlines"
                                             ? data.airlines
-                                            : data.airports
+                                            : item.label.toLowerCase() ===
+                                              "airports"
+                                            ? data.airports
+                                            : data.offices || []
                                           : [];
 
                                         return itemsArray.length > 0 ? (
@@ -705,7 +714,10 @@ const Nav = () => {
                                                 {item.label.toLowerCase() ===
                                                 "airlines"
                                                   ? "✈️"
-                                                  : "🛬"}
+                                                  : item.label.toLowerCase() ===
+                                                    "airports"
+                                                  ? "🛬"
+                                                  : "🏢"}
                                               </span>
                                               <span className="truncate">
                                                 {itemData.name}
@@ -1261,12 +1273,15 @@ const Nav = () => {
                                     </div>
                                   </div>
 
-                                  {/* Airlines/Airports */}
+                                  {/* Airlines/Airports/Offices */}
                                   <div>
                                     <h5 className="text-xs font-medium text-gray-500 mb-2 px-1">
                                       {item.label.toLowerCase() === "airlines"
                                         ? "AIRLINES"
-                                        : "AIRPORTS"}
+                                        : item.label.toLowerCase() ===
+                                          "airports"
+                                        ? "AIRPORTS"
+                                        : "OFFICES"}
                                     </h5>
                                     <div className="space-y-1">
                                       {(() => {
@@ -1276,7 +1291,10 @@ const Nav = () => {
                                           ? item.label.toLowerCase() ===
                                             "airlines"
                                             ? data.airlines
-                                            : data.airports
+                                            : item.label.toLowerCase() ===
+                                              "airports"
+                                            ? data.airports
+                                            : data.offices || []
                                           : [];
 
                                         return itemsArray.length > 0 ? (
@@ -1295,7 +1313,10 @@ const Nav = () => {
                                                 {item.label.toLowerCase() ===
                                                 "airlines"
                                                   ? "✈️"
-                                                  : "🛬"}
+                                                  : item.label.toLowerCase() ===
+                                                    "airports"
+                                                  ? "🛬"
+                                                  : "🏢"}
                                               </span>
                                               <span className="text-xs truncate">
                                                 {itemData.name}

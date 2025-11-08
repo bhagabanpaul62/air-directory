@@ -1,10 +1,8 @@
 "use client";
 import { useState, useMemo } from "react";
-import Card from "@/components/card/Card";
 
 function DirectoryContent({ airlines, airports, filters }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState("grid");
   const itemsPerPage = 12;
 
   // Filter and combine data
@@ -80,44 +78,17 @@ function DirectoryContent({ airlines, airports, filters }) {
     <div id="directory-results">
       {/* Results Header */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Directory Results
-            </h2>
-            <div className="hidden sm:block w-px h-6 bg-gray-300"></div>
-            <p className="text-sm text-gray-600">
-              Showing {startIndex + 1}-
-              {Math.min(startIndex + itemsPerPage, filteredData.length)} of{" "}
-              {filteredData.length} results
-              {filters.search && ` for "${filters.search}"`}
-            </p>
-          </div>
-
-          {/* View Toggle */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">View:</span>
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${
-                viewMode === "grid"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Grid
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${
-                viewMode === "list"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              List
-            </button>
-          </div>
+        <div className="flex items-center gap-4">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Directory Results
+          </h2>
+          <div className="hidden sm:block w-px h-6 bg-gray-300"></div>
+          <p className="text-sm text-gray-600">
+            Showing {startIndex + 1}-
+            {Math.min(startIndex + itemsPerPage, filteredData.length)} of{" "}
+            {filteredData.length} results
+            {filters.search && ` for "${filters.search}"`}
+          </p>
         </div>
 
         {/* Filter Summary */}
@@ -141,93 +112,138 @@ function DirectoryContent({ airlines, airports, filters }) {
         )}
       </div>
 
-      {/* Results Grid/List */}
+      {/* Results List */}
       {currentData.length > 0 ? (
         <>
-          {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-              {currentData.map((item, index) => {
-                const itemType =
-                  item.itemType === "airline" ? "Airline" : "Airport";
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Type
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Location
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Codes
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {currentData.map((item, index) => {
+                    const itemType =
+                      item.itemType === "airline" ? "Airline" : "Airport";
 
-                return (
-                  <Card
-                    key={`${item._id}-${index}`}
-                    id={item._id}
-                    Name={item.Name}
-                    Background_Image={item.Background_Image}
-                    Country={item.Country}
-                    city={item.City}
-                    IATA={item.IATA}
-                    ICAO={item.ICAO}
-                    type={itemType}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div className="space-y-4 mb-8">
-              {currentData.map((item, index) => {
-                const itemType =
-                  item.itemType === "airline" ? "Airline" : "Airport";
-
-                return (
-                  <div
-                    key={`${item._id}-${index}`}
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-center gap-6">
-                      {/* Image */}
-                      <div className="flex-shrink-0">
-                        <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
-                          {item.Background_Image ? (
-                            <img
-                              src={item.Background_Image}
-                              alt={item.Name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              <svg
-                                className="w-8 h-8"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                              </svg>
+                    return (
+                      <tr
+                        key={`${item._id}-${index}`}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        {/* Name Column */}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              {item.Background_Image ? (
+                                <img
+                                  className="h-10 w-10 rounded-lg object-cover"
+                                  src={item.Background_Image}
+                                  alt={item.Name}
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                                  <span className="text-gray-400 text-lg">
+                                    {itemType === "Airline" ? "✈️" : "🛬"}
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                              {item.Name}
-                            </h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {itemType}
-                              </span>
-                              {item.City && <span>{item.City}</span>}
-                              {item.Country && <span>{item.Country}</span>}
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              {item.IATA && <span>IATA: {item.IATA}</span>}
-                              {item.ICAO && <span>ICAO: {item.ICAO}</span>}
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {item.Name}
+                              </div>
                             </div>
                           </div>
+                        </td>
 
-                          {/* Action Button */}
-                          <a
-                            href={`/${itemType.toLowerCase()}/${item._id}`}
-                            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        {/* Type Column */}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              itemType === "Airline"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
                           >
-                            View Details
+                            {itemType}
+                          </span>
+                        </td>
+
+                        {/* Location Column */}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {item.City || "—"}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {item.Country || "—"}
+                          </div>
+                        </td>
+
+                        {/* Codes Column */}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col gap-1">
+                            {item.IATA && (
+                              <span className="text-xs text-gray-600">
+                                IATA:{" "}
+                                <span className="font-mono font-medium text-gray-900">
+                                  {item.IATA}
+                                </span>
+                              </span>
+                            )}
+                            {item.ICAO && (
+                              <span className="text-xs text-gray-600">
+                                ICAO:{" "}
+                                <span className="font-mono font-medium text-gray-900">
+                                  {item.ICAO}
+                                </span>
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Action Column */}
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <a
+                            href={`/${
+                              itemType === "Airline" ? "airLine" : "airport"
+                            }/${item._id}`}
+                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900 font-medium transition-colors"
+                          >
+                            View
                             <svg
-                              className="ml-2 w-4 h-4"
+                              className="w-4 h-4"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -240,14 +256,14 @@ function DirectoryContent({ airlines, airports, filters }) {
                               />
                             </svg>
                           </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          )}
+          </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
