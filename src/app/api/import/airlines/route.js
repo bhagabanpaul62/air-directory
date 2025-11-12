@@ -6,13 +6,19 @@ import AirLine from "@/model/airLines.model";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-function toNumber(v) {
-  if (v === undefined || v === null || v === "") return undefined;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : undefined;
+function generateSlug(name) {
+  if (!name) return undefined;
+  return name
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+    .trim();
 }
 
 function mapRecord(r) {
+  const slug = generateSlug(r.Name);
+
   return {
     airline_id: r.aireline_id || r.airline_id || undefined,
     Continent: r.Continent || undefined,
@@ -20,6 +26,7 @@ function mapRecord(r) {
     Region: r.Region || undefined,
     City: r.City || undefined,
     Name: r.Name,
+    slug: slug,
     Info: r.Info || undefined,
     Description: r.Description || undefined,
     Website: r.Website || undefined,
@@ -34,16 +41,28 @@ function mapRecord(r) {
     Logo: r.Logo || undefined,
     Background_Image: r["Background Image"] || r.Background_Image || undefined,
     youtube: r.YouTube || r.youtube || undefined,
-    Latitude: toNumber(r.Latitude),
-    Longitude: toNumber(r.Longitude),
+    Google_Maps_Link: r.Google_Maps_Link || undefined,
   };
 }
 
 export async function POST(request) {
-  await connectDb();
+  try {
+    await connectDb();
+  } catch (dbErr) {
+    console.error("Database connection error:", dbErr);
+    return NextResponse.json(
+      {
+        message: "Database connection failed",
+        error: String(dbErr.message || dbErr),
+      },
+      { status: 500 }
+    );
+  }
 
   const form = await request.formData();
   const file = form.get("file");
+
+  console.log("File received:", file ? file.name : "No file");
 
   if (!file || typeof file === "string") {
     return NextResponse.json(
@@ -61,7 +80,13 @@ export async function POST(request) {
       skip_empty_lines: true,
       trim: true,
     });
+    console.log(`Parsed ${records.length} records from CSV`);
+    if (records.length > 0) {
+      console.log("First record keys:", Object.keys(records[0]));
+      console.log("First record sample:", records[0]);
+    }
   } catch (err) {
+    console.error("CSV parse error:", err);
     return NextResponse.json(
       { message: "CSV parse error", error: String(err.message || err) },
       { status: 400 }
@@ -76,21 +101,47 @@ export async function POST(request) {
     );
   }
 
-  const ops = docs.map((d) => ({
-    updateOne: {
-      filter: d.airline_id ? { airline_id: d.airline_id } : { Name: d.Name },
-      update: { $set: d },
-      upsert: true,
-    },
-  }));
-
+  // Using bulkWrite with save hooks workaround
   try {
-    const result = await AirLine.bulkWrite(ops, { ordered: false });
+    let upserted = 0;
+    let modified = 0;
+    let matched = 0;
+
+    for (const doc of docs) {
+      try {
+        // Find existing document
+        const filter = doc.airline_id
+          ? { airline_id: doc.airline_id }
+          : { Name: doc.Name };
+
+        const existing = await AirLine.findOne(filter);
+
+        if (existing) {
+          // Update existing document (triggers pre-save hooks)
+          Object.assign(existing, doc);
+          await existing.save();
+          modified++;
+          matched++;
+          console.log(`Updated: ${existing.Name}, slug: ${existing.slug}`);
+        } else {
+          // Create new document (triggers pre-save hooks)
+          const newAirline = new AirLine(doc);
+          await newAirline.save();
+          upserted++;
+          console.log(`Created: ${newAirline.Name}, slug: ${newAirline.slug}`);
+        }
+      } catch (docErr) {
+        console.error(`Error processing airline ${doc.Name}:`, docErr.message);
+        // Continue with next document
+      }
+    }
+
     const summary = {
-      upserted: result.upsertedCount ?? result.nUpserted ?? 0,
-      modified: result.modifiedCount ?? result.nModified ?? 0,
-      matched: result.matchedCount ?? result.nMatched ?? 0,
+      upserted,
+      modified,
+      matched,
     };
+
     return NextResponse.json(
       { ok: true, count: docs.length, ...summary },
       { status: 200 }

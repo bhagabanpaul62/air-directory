@@ -4,13 +4,33 @@ function Card({
   id,
   Name,
   Background_Image,
-
   Country,
   city,
   IATA,
   ICAO,
   type,
+  continent,
+  slug,
 }) {
+  // Create URL-friendly slug if not provided
+  const urlSlug =
+    slug ||
+    Name.toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  const urlContinent = continent || "other";
+
+  // Determine the correct URL path
+  let detailUrl;
+  if (type === "Airline" || type === "airline") {
+    detailUrl = `/airlines/${urlContinent}/${urlSlug}`;
+  } else if (type === "Airport" || type === "airport") {
+    detailUrl = `/airports/${urlContinent}/${urlSlug}`;
+  } else {
+    // Fallback to old URL structure
+    detailUrl = `/${type === "Airline" ? "airLine" : "airport"}/${id}`;
+  }
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
       {/* Header Section with Background Image */}
@@ -80,7 +100,7 @@ function Card({
         {/* Quick View Button */}
         <div className="flex justify-center items-center">
           <Link
-            href={`/${type === "Airline" ? "airLine" : "airport"}/${id}`}
+            href={detailUrl}
             className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors duration-200 text-center"
           >
             Quick View

@@ -1,20 +1,18 @@
 import React from "react";
 
 function LocationMap({
-  Latitude,
-  Longitude,
+  Google_Maps_Link,
   Name,
   Address,
   Phone,
   Email,
   Country,
 }) {
-  // If no coordinates are provided, show placeholder
-  if (!Latitude || !Longitude) {
+  if (!Google_Maps_Link) {
     return (
       <div className="p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">
-           Location & Map
+          Location & Map
         </h3>
         <div className="bg-gray-100 rounded-xl p-8 text-center">
           <svg
@@ -36,139 +34,113 @@ function LocationMap({
               d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          <p className="text-gray-500 text-sm">
-            Location coordinates not available
-          </p>
+          <p className="text-gray-500 text-sm">Location map not available</p>
         </div>
       </div>
     );
   }
 
-  // Generate map URLs for different providers
-  const googleMapsUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBHCxKG6pJhGE6H1HcFwqWqjOqY5B4mOaY&q=${Latitude},${Longitude}&zoom=15`;
-  const openStreetMapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${
-    Longitude - 0.01
-  },${Latitude - 0.01},${Longitude + 0.01},${
-    Latitude + 0.01
-  }&layer=mapnik&marker=${Latitude},${Longitude}`;
+  const getEmbedUrl = (link) => {
+    if (!link) return "";
+    if (link.includes("/embed")) return link;
+    const match = link.match(/q=([-\d.]+),([-\d.]+)/);
+    if (match) {
+      const [, lat, lng] = match;
+      return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d15000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2s!4v1234567890`;
+    }
+    return link;
+  };
+
+  const embedUrl = getEmbedUrl(Google_Maps_Link);
 
   return (
-    <div className="p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">
+    <div className="p-8">
+      <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+        <svg
+          className="w-7 h-7 text-blue-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
         {Country} Headquarter Information
       </h3>
 
-      {/* Address Information */}
-
-      <div className="flex justify-center gap-4">
+      {/* Contact Information */}
+      <div className="flex justify-center gap-4 mb-6">
         {Phone && (
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg w-[50%]">
-            <p className="text-sm text-gray-600">Toll-Free-Number</p>
-            <p className="text-gray-900 text-sm font-medium">{Phone}</p>
+          <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg w-[50%] border border-gray-200">
+            <p className="text-xs text-gray-500 font-medium mb-1">
+              Phone Number
+            </p>
+            <p className="text-gray-900 text-sm font-semibold">{Phone}</p>
           </div>
         )}
         {Email && (
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg  w-[50%]">
-            <p className="text-sm text-gray-600">Email</p>
-            <p className="text-gray-900 text-sm font-medium">{Email}</p>
+          <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg w-[50%] border border-gray-200">
+            <p className="text-xs text-gray-500 font-medium mb-1">
+              Email Address
+            </p>
+            <p className="text-gray-900 text-sm font-semibold break-all">
+              {Email}
+            </p>
           </div>
         )}
       </div>
 
-      {/* Coordinates */}
-      <div className="mb-4 grid grid-cols-2 gap-3">
-        <div className="p-3 bg-blue-50 rounded-lg">
-          <p className="text-xs text-blue-600 font-medium">Latitude</p>
-          <p className="text-blue-900 text-sm font-mono">{Latitude}°</p>
+      {/* Address */}
+      {Address && (
+        <div className="mb-6">
+          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-l-4 border-blue-600">
+            <p className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-2">
+              Office Address
+            </p>
+            <p className="text-blue-900 text-base font-medium">{Address}</p>
+          </div>
         </div>
-        <div className="p-3 bg-blue-50 rounded-lg">
-          <p className="text-xs text-blue-600 font-medium">Longitude</p>
-          <p className="text-blue-900 text-sm font-mono">{Longitude}°</p>
-        </div>
-      </div>
+      )}
 
-      {/* OpenStreetMap Embed */}
+      {/* Google Maps Embed */}
       <div
-        className="relative bg-gray-200 rounded-xl overflow-hidden"
-        style={{ height: "300px" }}
+        className="relative bg-gray-200 rounded-xl overflow-hidden shadow-lg mb-4"
+        style={{ height: "400px" }}
       >
         <iframe
-          src={openStreetMapUrl}
+          src={embedUrl}
           width="100%"
           height="100%"
           style={{ border: 0 }}
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
-          title={`Map showing location of ${Name || "Airport"}`}
+          title={`Location map of ${Name || "office"}`}
           className="rounded-xl"
         />
       </div>
 
-      {/* Map Links */}
-      <div className="mt-4 flex space-x-3">
+      {/* Open in Google Maps Button */}
+      <div className="mt-4">
         <a
-          href={`https://www.google.com/maps/search/?api=1&query=${Latitude},${Longitude}`}
+          href={Google_Maps_Link}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center py-2 px-3 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center justify-center py-3 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
         >
-          <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
           </svg>
           Open in Google Maps
-        </a>
-
-        <a
-          href={`https://www.openstreetmap.org/?mlat=${Latitude}&mlon=${Longitude}&zoom=15`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center py-2 px-3 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
-        >
-          <svg
-            className="w-4 h-4 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-          Open in OSM
-        </a>
-      </div>
-
-      {/* Get Directions Link */}
-      <div className="mt-3">
-        <a
-          href={`https://www.google.com/maps/dir/?api=1&destination=${Latitude},${Longitude}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full flex items-center justify-center py-2 px-3 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <svg
-            className="w-4 h-4 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-            />
-          </svg>
-          Get Directions
         </a>
       </div>
     </div>

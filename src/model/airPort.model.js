@@ -9,6 +9,7 @@ const AirPortSchema = new mongoose.Schema(
     Region: { type: String, trim: true },
     City: { type: String, trim: true },
     Name: { type: String, required: true, trim: true },
+    slug: { type: String, unique: true, sparse: true, lowercase: true },
     Info: { type: String, trim: true },
     Description: { type: String, trim: true },
     Website: { type: String, trim: true },
@@ -35,11 +36,16 @@ const AirPortSchema = new mongoose.Schema(
       maxlength: 4,
     },
     Address: { type: String, trim: true },
-    Latitude: { type: Number },
-    Longitude: { type: Number },
+    Google_Maps_Link: { type: String, trim: true },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.AirPort ||
-  mongoose.model("AirPort", AirPortSchema);
+// Delete the cached model if it exists
+if (mongoose.models.AirPort) {
+  delete mongoose.models.AirPort;
+}
+
+const AirPort = mongoose.model("AirPort", AirPortSchema);
+
+export default AirPort;

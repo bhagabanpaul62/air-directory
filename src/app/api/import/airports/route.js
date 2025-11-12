@@ -12,6 +12,16 @@ function toNumber(v) {
   return Number.isFinite(n) ? n : undefined;
 }
 
+function generateSlug(name) {
+  if (!name) return undefined;
+  return name
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+    .trim();
+}
+
 function normalizeRecordKeys(r) {
   const out = {};
   for (const [k, v] of Object.entries(r || {})) {
@@ -24,23 +34,30 @@ function normalizeRecordKeys(r) {
 
 function mapRecord(r) {
   const rr = normalizeRecordKeys(r);
+  const slug = generateSlug(rr["name"]);
 
   const record = {
-    airport_id: rr["airport_id"] || undefined, // Remove aireport_id reference
+    airport_id: rr["airport_id"] || undefined,
     Continent: rr["continent"] || undefined,
     Country: rr["country"] || undefined,
     Region: rr["region"] || undefined,
     City: rr["city"] || undefined,
     Name: rr["name"],
+    slug: slug,
     Info: rr["info"] || undefined,
     Description: rr["description"] || undefined,
     Website: rr["website"] || undefined,
     Facebook: rr["facebook"] || undefined,
     X: rr["x"] || rr["twitter"] || undefined,
-    YouTube: rr["youtube"] || rr["youTube"] || undefined,
+    YouTube: rr["youtube"] || undefined,
     LinkedIn: rr["linkedin"] || undefined,
     Email: (rr["email"] || "").toLowerCase() || undefined,
     Phone: rr["phone"] || undefined,
+    IATA: (rr["iata"] || "").toUpperCase() || undefined,
+    ICAO: (rr["icao"] || "").toUpperCase() || undefined,
+    Address: rr["address"] || undefined,
+    Google_Maps_Link:
+      rr["google_maps_link"] || rr["google maps link"] || undefined,
     Logo: rr["logo"] || rr["logo_url"] || rr["logo url"] || undefined,
     Background_Image:
       rr["background_image"] ||
@@ -49,11 +66,6 @@ function mapRecord(r) {
       rr["bg_image"] ||
       rr["bg image"] ||
       undefined,
-    IATA: (rr["iata"] || "").toUpperCase() || undefined,
-    ICAO: (rr["icao"] || "").toUpperCase() || undefined,
-    Address: rr["address"] || undefined,
-    Latitude: toNumber(rr["latitude"]),
-    Longitude: toNumber(rr["longitude"]),
   };
 
   // Filter out undefined values to avoid storing them in MongoDB
@@ -198,12 +210,45 @@ export async function POST(request) {
   console.log("Total operations to execute:", ops.length);
 
   try {
-    const result = await AirPort.bulkWrite(ops, { ordered: false });
-    console.log("MongoDB bulk write result:", result);
+    // Using individual save operations to trigger pre-save hooks
+    let upserted = 0;
+    let modified = 0;
+    let matched = 0;
+
+    for (const doc of docs) {
+      try {
+        const id = doc.airport_id;
+        const filter = id ? { airport_id: id } : { Name: doc.Name };
+
+        const existing = await AirPort.findOne(filter);
+
+        if (existing) {
+          // Update existing document (triggers pre-save hooks)
+          Object.assign(existing, doc);
+          await existing.save();
+          modified++;
+          matched++;
+          console.log(`Updated: ${existing.Name}, slug: ${existing.slug}`);
+        } else {
+          // Create new document (triggers pre-save hooks)
+          const newAirport = new AirPort(doc);
+          await newAirport.save();
+          upserted++;
+          console.log(`Created: ${newAirport.Name}, slug: ${newAirport.slug}`);
+        }
+      } catch (docErr) {
+        console.error(
+          `Error processing airport ${doc.Name || doc.airport_id}:`,
+          docErr.message
+        );
+        // Continue with next document
+      }
+    }
+
     const summary = {
-      upserted: result.upsertedCount ?? result.nUpserted ?? 0,
-      modified: result.modifiedCount ?? result.nModified ?? 0,
-      matched: result.matchedCount ?? result.nMatched ?? 0,
+      upserted,
+      modified,
+      matched,
     };
     console.log("Import summary:", summary);
     return NextResponse.json(

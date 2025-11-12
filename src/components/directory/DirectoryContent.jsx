@@ -1,6 +1,14 @@
 "use client";
 import { useState, useMemo } from "react";
 
+// Helper function to create URL-friendly slug
+function createSlug(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function DirectoryContent({ airlines, airports, filters }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
@@ -237,8 +245,10 @@ function DirectoryContent({ airlines, airports, filters }) {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <a
                             href={`/${
-                              itemType === "Airline" ? "airLine" : "airport"
-                            }/${item._id}`}
+                              itemType === "airline" ? "airlines" : "airports"
+                            }/${createSlug(
+                              item.Continent || "other"
+                            )}/${createSlug(item.Name)}`}
                             className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900 font-medium transition-colors"
                           >
                             View

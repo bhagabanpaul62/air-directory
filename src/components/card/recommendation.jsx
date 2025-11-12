@@ -2,7 +2,53 @@
 import { useState, useEffect } from "react";
 import Card from "./Card";
 
-function Recommendation({ data, text, type, api, itemsPerPage = 8 }) {
+// Helper function to create URL-friendly slug
+function createSlug(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function Recommendation({ data, text, type, api, itemsPerPage = 8, items }) {
+  // If items prop is provided (server-rendered), use it directly
+  if (items && items.length > 0) {
+    return (
+      <div className="py-8 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {items.map((item, i) => (
+            <Card
+              Name={item.Name}
+              Background_Image={item.Background_Image}
+              Country={item.Country}
+              city={item.City}
+              IATA={item.IATA}
+              ICAO={item.ICAO}
+              key={`${item._id}-${i}`}
+              id={item._id}
+              type={item.type}
+              continent={item.continent}
+              slug={item.slug}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Otherwise use client-side fetching (legacy support)
+  return (
+    <LegacyRecommendation
+      data={data}
+      text={text}
+      type={type}
+      api={api}
+      itemsPerPage={itemsPerPage}
+    />
+  );
+}
+
+function LegacyRecommendation({ data, text, type, api, itemsPerPage = 8 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [mainData, setMainData] = useState([]);
@@ -78,6 +124,8 @@ function Recommendation({ data, text, type, api, itemsPerPage = 8 }) {
                 key={`${item._id}-${i}`}
                 id={item._id}
                 type={type}
+                continent={createSlug(item.Continent || "other")}
+                slug={createSlug(item.Name)}
               />
             ))}
           </div>

@@ -5,14 +5,31 @@ import AirPort from "@/model/airPort.model";
 export async function GET(request, { params }) {
   await connectDb();
 
-  const { id } = params;
+  const { id } = await params;
 
   if (!id) {
-    return NextResponse.json({ message: "id is required" }, { status: 400 });
+    return NextResponse.json(
+      { message: "id or slug is required" },
+      { status: 400 }
+    );
   }
 
   try {
-    const airport = await AirPort.findOne({_id:id});
+    // Try to find by slug first, then fallback to _id
+    let airport = await AirPort.findOne({ slug: id });
+
+    // If not found by slug, try by _id (for backward compatibility)
+    if (!airport) {
+      airport = await AirPort.findOne({ _id: id });
+    }
+
+    if (!airport) {
+      return NextResponse.json(
+        { message: "Airport not found" },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(airport, { status: 200 });
   } catch (error) {
     return NextResponse.json(

@@ -10,7 +10,7 @@ function Contact({ Phone, Email, Address, Website }) {
         {Website && (
           <div className="flex-col">
             <span className="text-gray-600 block">Website</span>
-            <a target="blank" href={Website} className="text-gray-900 block">{Website}</a>
+            <a target="blank" href={Website} className="text-blue-500 block">{Website}</a>
           </div>
         )}
         {Email && (
