@@ -39,11 +39,7 @@ function BannerImg({ Background_Image, logo, name, Continent, Country }) {
                   {name || "Airport Details"}
                 </h1>
 
-                {/* Subtitle */}
-                <p className="text-lg sm:text-xl md:text-2xl opacity-90 max-w-2xl leading-relaxed">
-                  Your gateway to {Continent || "the world"} - Connecting
-                  travelers worldwide
-                </p>
+                
               </div>
 
               {/* Right: Airport Logo */}
