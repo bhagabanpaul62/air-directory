@@ -24,7 +24,9 @@ export default function AdminPage() {
       const endpoint =
         activeTab === "airlines"
           ? "/api/admin/airlines"
-          : "/api/admin/airports";
+          : activeTab === "airports"
+          ? "/api/admin/airports"
+          : "/api/admin/offices";
       const params = new URLSearchParams({
         page: page.toString(),
         limit: "10",
@@ -35,7 +37,13 @@ export default function AdminPage() {
       const result = await response.json();
 
       if (response.ok) {
-        setData(activeTab === "airlines" ? result.airlines : result.airports);
+        setData(
+          activeTab === "airlines"
+            ? result.airlines
+            : activeTab === "airports"
+            ? result.airports
+            : result.offices
+        );
         setPagination(result.pagination);
       }
     } catch (error) {
@@ -76,7 +84,9 @@ export default function AdminPage() {
       const endpoint =
         activeTab === "airlines"
           ? `/api/admin/airlines/${id}`
-          : `/api/admin/airports/${id}`;
+          : activeTab === "airports"
+          ? `/api/admin/airports/${id}`
+          : `/api/admin/offices/${id}`;
       const response = await fetch(endpoint, { method: "DELETE" });
 
       if (response.ok) {
@@ -100,7 +110,9 @@ export default function AdminPage() {
       const endpoint =
         activeTab === "airlines"
           ? "/api/admin/airlines"
-          : "/api/admin/airports";
+          : activeTab === "airports"
+          ? "/api/admin/airports"
+          : "/api/admin/offices";
 
       let response;
       if (modalMode === "add") {
@@ -183,7 +195,9 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             <h1 className="text-3xl font-bold text-black">Admin Dashboard</h1>
-            <p className="text-black mt-1">Manage airlines and airports data</p>
+            <p className="text-black mt-1">
+              Manage airlines, airports, and offices data
+            </p>
           </div>
         </div>
       </div>
@@ -212,6 +226,16 @@ export default function AdminPage() {
             >
               Airports
             </button>
+            <button
+              onClick={() => setActiveTab("offices")}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "offices"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-black hover:text-black hover:border-gray-300"
+              }`}
+            >
+              Offices
+            </button>
           </nav>
         </div>
 
@@ -232,7 +256,12 @@ export default function AdminPage() {
               onClick={() => openModal("add")}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Add {activeTab === "airlines" ? "Airline" : "Airport"}
+              Add{" "}
+              {activeTab === "airlines"
+                ? "Airline"
+                : activeTab === "airports"
+                ? "Airport"
+                : "Office"}
             </button>
           </div>
 
@@ -346,11 +375,20 @@ function DataTable({ data, type, onEdit, onDelete }) {
           { key: "City", label: "City" },
           { key: "Website", label: "Website" },
         ]
-      : [
+      : type === "airports"
+      ? [
           { key: "airport_id", label: "ID" },
           { key: "Name", label: "Name" },
           { key: "IATA", label: "IATA" },
           { key: "ICAO", label: "ICAO" },
+          { key: "Country", label: "Country" },
+          { key: "City", label: "City" },
+          { key: "Website", label: "Website" },
+        ]
+      : [
+          { key: "office_id", label: "ID" },
+          { key: "Name", label: "Name" },
+          { key: "Type", label: "Type" },
           { key: "Country", label: "Country" },
           { key: "City", label: "City" },
           { key: "Website", label: "Website" },
@@ -434,8 +472,6 @@ function Modal({ isOpen, onClose, type, mode, item, onSave }) {
   const getInitialFormData = () => {
     const baseFields = {
       Name: "",
-      IATA: "",
-      ICAO: "",
       Country: "",
       City: "",
       Continent: "",
@@ -451,20 +487,31 @@ function Modal({ isOpen, onClose, type, mode, item, onSave }) {
       LinkedIn: "",
       Logo: "",
       Background_Image: "",
-      Latitude: "",
-      Longitude: "",
+      Google_Maps_Link: "",
     };
 
     if (type === "airlines") {
       return {
         ...baseFields,
         airline_id: "",
+        IATA: "",
+        ICAO: "",
         youtube: "",
+      };
+    } else if (type === "airports") {
+      return {
+        ...baseFields,
+        airport_id: "",
+        IATA: "",
+        ICAO: "",
+        X: "",
+        YouTube: "",
       };
     } else {
       return {
         ...baseFields,
-        airport_id: "",
+        office_id: "",
+        Type: "",
         X: "",
         YouTube: "",
       };
@@ -502,7 +549,11 @@ function Modal({ isOpen, onClose, type, mode, item, onSave }) {
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-black">
               {mode === "add" ? "Add" : "Edit"}{" "}
-              {type === "airlines" ? "Airline" : "Airport"}
+              {type === "airlines"
+                ? "Airline"
+                : type === "airports"
+                ? "Airport"
+                : "Office"}
             </h2>
             <button
               onClick={onClose}
@@ -550,6 +601,36 @@ function Modal({ isOpen, onClose, type, mode, item, onSave }) {
                   />
                 </div>
               )}
+              {type === "offices" && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      Office ID
+                    </label>
+                    <input
+                      type="text"
+                      name="office_id"
+                      placeholder="Office ID"
+                      value={formData.office_id || ""}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      Type *
+                    </label>
+                    <input
+                      type="text"
+                      name="Type"
+                      placeholder="e.g., Tourism Board, Embassy, Consulate"
+                      value={formData.Type || ""}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                    />
+                  </div>
+                </>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-black mb-1">
@@ -559,7 +640,11 @@ function Modal({ isOpen, onClose, type, mode, item, onSave }) {
                   type="text"
                   name="Name"
                   placeholder={`${
-                    type === "airlines" ? "Airline" : "Airport"
+                    type === "airlines"
+                      ? "Airline"
+                      : type === "airports"
+                      ? "Airport"
+                      : "Office"
                   } Name`}
                   value={formData.Name || ""}
                   onChange={handleChange}
@@ -568,35 +653,39 @@ function Modal({ isOpen, onClose, type, mode, item, onSave }) {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-black mb-1">
-                  IATA Code
-                </label>
-                <input
-                  type="text"
-                  name="IATA"
-                  placeholder="IATA Code"
-                  value={formData.IATA || ""}
-                  onChange={handleChange}
-                  maxLength="3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                />
-              </div>
+              {(type === "airlines" || type === "airports") && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      IATA Code
+                    </label>
+                    <input
+                      type="text"
+                      name="IATA"
+                      placeholder="IATA Code"
+                      value={formData.IATA || ""}
+                      onChange={handleChange}
+                      maxLength="3"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-black mb-1">
-                  ICAO Code
-                </label>
-                <input
-                  type="text"
-                  name="ICAO"
-                  placeholder="ICAO Code"
-                  value={formData.ICAO || ""}
-                  onChange={handleChange}
-                  maxLength="4"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      ICAO Code
+                    </label>
+                    <input
+                      type="text"
+                      name="ICAO"
+                      placeholder="ICAO Code"
+                      value={formData.ICAO || ""}
+                      onChange={handleChange}
+                      maxLength="4"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -678,28 +767,16 @@ function Modal({ isOpen, onClose, type, mode, item, onSave }) {
 
               <div>
                 <label className="block text-sm font-medium text-black mb-1">
-                  Coordinates
+                  Google Maps Link
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    name="Latitude"
-                    placeholder="Latitude"
-                    value={formData.Latitude || ""}
-                    onChange={handleChange}
-                    step="any"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                  />
-                  <input
-                    type="number"
-                    name="Longitude"
-                    placeholder="Longitude"
-                    value={formData.Longitude || ""}
-                    onChange={handleChange}
-                    step="any"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                  />
-                </div>
+                <input
+                  type="url"
+                  name="Google_Maps_Link"
+                  placeholder="https://maps.google.com/?q=lat,lng"
+                  value={formData.Google_Maps_Link || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                />
               </div>
             </div>
           </div>
@@ -818,7 +895,7 @@ function Modal({ isOpen, onClose, type, mode, item, onSave }) {
                 </div>
               )}
 
-              {type === "airports" && (
+              {(type === "airports" || type === "offices") && (
                 <>
                   <div>
                     <label className="block text-sm font-medium text-black mb-1">

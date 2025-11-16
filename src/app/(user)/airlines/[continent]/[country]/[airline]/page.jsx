@@ -1,4 +1,4 @@
-import Recommendation from "@/components/card/recommendation";
+import DataBox from "@/components/card/dataBox";
 import BannerImg from "@/components/detail_page/banner";
 import Contact from "@/components/detail_page/contact";
 import Info from "@/components/detail_page/info";
@@ -19,6 +19,49 @@ async function Page({ params }) {
   );
 
   const data = await res.json();
+
+  // Fetch all offices to filter by country
+  const officesRes = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/office`,
+    {
+      cache: "no-store",
+    }
+  );
+  const allOffices = await officesRes.json();
+
+  // Get unique office names in the same country
+  const officesInCountry = [
+    ...new Set(
+      allOffices
+        .filter((office) => office.Country === data.Country)
+        .map((office) => office.Name)
+    ),
+  ];
+
+  // Create basePath for office links
+  const continentSlug = data.Continent.toLowerCase().replace(/\s+/g, "-");
+  const countrySlug = data.Country.toLowerCase().replace(/\s+/g, "-");
+  const officeBasePath = `/office/${continentSlug}/${countrySlug}`;
+
+  // Fetch all airlines to show other airlines in same country
+  const airlinesRes = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/airLine`,
+    {
+      cache: "no-store",
+    }
+  );
+  const allAirlines = await airlinesRes.json();
+
+  // Get unique airline names in the same country (excluding current airline)
+  const airlinesInCountry = [
+    ...new Set(
+      allAirlines
+        .filter((a) => a.Country === data.Country && a.Name !== data.Name)
+        .map((a) => a.Name)
+    ),
+  ];
+
+  const airlineBasePath = `/airlines/${continentSlug}/${countrySlug}`;
 
   return (
     <div className="min-h-screen bg-gray-50 -mt-10">
@@ -91,14 +134,15 @@ async function Page({ params }) {
           </div>
         </div>
         <div>
-          {/* //other airports same continents cord */}
-          <Recommendation
-            data={data.Country}
-            text={"Airlines office in other location"}
-            type={"Airline"}
-            api={"airLine"}
+          {/* Other offices in same country */}
+          <DataBox
+            mainText={`Offices in ${data.Country}`}
+            subtext="Select an Office to view details"
+            data={officesInCountry}
+            basePath={officeBasePath}
           />
         </div>
+        
       </div>
     </div>
   );

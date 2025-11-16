@@ -8,11 +8,11 @@ import SocialLink from "@/components/detail_page/socialLink";
 import DynamicBreadcrumb from "@/components/ui/DynamicBreadcrumb";
 
 async function Page({ params }) {
-  const { airport } = await params;
-  console.log("airport slug:", airport);
+  const { office } = await params;
+  console.log("office slug:", office);
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/airPort/${airport}`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/office/${office}`,
     {
       cache: "no-store",
     }
@@ -29,12 +29,12 @@ async function Page({ params }) {
   );
   const allOffices = await officesRes.json();
 
-  // Get unique office names in the same country
+  // Get unique office names in the same country (excluding current office)
   const officesInCountry = [
     ...new Set(
       allOffices
-        .filter((office) => office.Country === data.Country)
-        .map((office) => office.Name)
+        .filter((o) => o.Country === data.Country && o.Name !== data.Name)
+        .map((o) => o.Name)
     ),
   ];
 
@@ -42,26 +42,6 @@ async function Page({ params }) {
   const continentSlug = data.Continent.toLowerCase().replace(/\s+/g, "-");
   const countrySlug = data.Country.toLowerCase().replace(/\s+/g, "-");
   const officeBasePath = `/office/${continentSlug}/${countrySlug}`;
-
-  // Fetch all airports to show other airports in same country
-  const airportsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/airPort`,
-    {
-      cache: "no-store",
-    }
-  );
-  const allAirports = await airportsRes.json();
-
-  // Get unique airport names in the same country (excluding current airport)
-  const airportsInCountry = [
-    ...new Set(
-      allAirports
-        .filter((a) => a.Country === data.Country && a.Name !== data.Name)
-        .map((a) => a.Name)
-    ),
-  ];
-
-  const airportBasePath = `/airports/${continentSlug}/${countrySlug}`;
 
   return (
     <div className="min-h-screen bg-gray-50 -mt-10">
@@ -80,7 +60,7 @@ async function Page({ params }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Airport Information */}
+            {/* Office Information */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <Info Info={data.Info} Description={data.Description} />
             </div>
@@ -101,15 +81,14 @@ async function Page({ params }) {
           {/* Right Column - Sidebar */}
           <div className="lg:col-span-1 space-y-6">
             {/* Quick Facts */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <Quick_Fact
                 City={data.City}
-                IATA={data.IATA}
-                ICAO={data.ICAO}
+                Type={data.Type}
                 Country={data.Country}
                 Region={data.Region}
               />
-            </div>
+            </div> */}
 
             {/* Contact Information */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -134,15 +113,14 @@ async function Page({ params }) {
           </div>
         </div>
         <div>
-          {/* Offices in same country */}
+          {/* Other offices in same country */}
           <DataBox
-            mainText={`Offices in ${data.Country}`}
+            mainText={`Other Offices in ${data.Country}`}
             subtext="Select an Office to view details"
             data={officesInCountry}
             basePath={officeBasePath}
           />
         </div>
-    
       </div>
     </div>
   );

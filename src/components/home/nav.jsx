@@ -5,9 +5,11 @@ import Link from "next/link";
 export default function Nav() {
   const [airlinesOpen, setAirlinesOpen] = useState(false);
   const [airportsOpen, setAirportsOpen] = useState(false);
+  const [officesOpen, setOfficesOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileAirlinesOpen, setMobileAirlinesOpen] = useState(false);
   const [mobileAirportsOpen, setMobileAirportsOpen] = useState(false);
+  const [mobileOfficesOpen, setMobileOfficesOpen] = useState(false);
 
   const navRef = useRef(null);
 
@@ -27,6 +29,7 @@ export default function Nav() {
         setMobileMenuOpen(false);
         setMobileAirlinesOpen(false);
         setMobileAirportsOpen(false);
+        setMobileOfficesOpen(false);
       }
     };
     window.addEventListener("resize", handleResize);
@@ -40,8 +43,10 @@ export default function Nav() {
         setMobileMenuOpen(false);
         setMobileAirlinesOpen(false);
         setMobileAirportsOpen(false);
+        setMobileOfficesOpen(false);
         setAirlinesOpen(false);
         setAirportsOpen(false);
+        setOfficesOpen(false);
       }
     };
 
@@ -70,6 +75,7 @@ export default function Nav() {
     setMobileMenuOpen(false);
     setMobileAirlinesOpen(false);
     setMobileAirportsOpen(false);
+    setMobileOfficesOpen(false);
   };
 
   return (
@@ -99,6 +105,7 @@ export default function Nav() {
                 onClick={() => {
                   setAirlinesOpen(!airlinesOpen);
                   setAirportsOpen(false);
+                  setOfficesOpen(false);
                 }}
               >
                 Airlines
@@ -141,6 +148,7 @@ export default function Nav() {
                 onClick={() => {
                   setAirportsOpen(!airportsOpen);
                   setAirlinesOpen(false);
+                  setOfficesOpen(false);
                 }}
               >
                 Airports
@@ -168,6 +176,49 @@ export default function Nav() {
                       href={`/airports/${c.toLowerCase().replace(/\s+/g, "-")}`}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                       onClick={() => setAirportsOpen(false)}
+                    >
+                      {c}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Offices Dropdown */}
+            <div className="relative group">
+              <button
+                className="text-gray-700 hover:text-blue-600 font-medium flex items-center gap-1 transition-colors"
+                onClick={() => {
+                  setOfficesOpen(!officesOpen);
+                  setAirlinesOpen(false);
+                  setAirportsOpen(false);
+                }}
+              >
+                Offices
+                <svg
+                  className={`w-4 h-4 transition-transform ${
+                    officesOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+              {officesOpen && (
+                <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100 animate-fadeIn">
+                  {continents.map((c) => (
+                    <Link
+                      key={c}
+                      href={`/office/${c.toLowerCase().replace(/\s+/g, "-")}`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      onClick={() => setOfficesOpen(false)}
                     >
                       {c}
                     </Link>
@@ -307,6 +358,47 @@ export default function Nav() {
                   <Link
                     key={c}
                     href={`/airports/${c.toLowerCase().replace(/\s+/g, "-")}`}
+                    className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    onClick={closeMobileMenu}
+                  >
+                    {c}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Offices Dropdown */}
+            <div>
+              <button
+                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                onClick={() => setMobileOfficesOpen(!mobileOfficesOpen)}
+              >
+                <span>Offices</span>
+                <svg
+                  className={`w-5 h-5 transition-transform ${
+                    mobileOfficesOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  mobileOfficesOpen ? "max-h-96" : "max-h-0"
+                }`}
+              >
+                {continents.map((c) => (
+                  <Link
+                    key={c}
+                    href={`/office/${c.toLowerCase().replace(/\s+/g, "-")}`}
                     className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                     onClick={closeMobileMenu}
                   >

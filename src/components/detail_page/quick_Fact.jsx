@@ -5,7 +5,7 @@ function Quick_Fact({ City, IATA, ICAO, Country, Region }) {
     { label: "IATA", value: IATA },
     { label: "ICAO", value: ICAO },
    
-    { label: "Call Sing", value: Country },
+   
   ].filter((fact) => fact.value);
 
   return (
