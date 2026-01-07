@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  web:
+    container_name: nextjs_app
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.production
+    depends_on:
+      - mongo
+    restart: always
+
+  mongo:
+    image: mongo:7
+    container_name: mongodb
+    restart: always
+    ports:
+      - "127.0.0.1:27017:27017"   # NOT public
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: Rudransh6295
+
+volumes:
+  mongo_data:
