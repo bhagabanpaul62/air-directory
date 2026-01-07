@@ -44,7 +44,6 @@ officeSchema.pre("save", function (next) {
 });
 
 // Indexes
-officeSchema.index({ slug: 1 });
 officeSchema.index({ Country: 1, City: 1 });
 officeSchema.index({ Continent: 1 });
 officeSchema.index({ Type: 1 });

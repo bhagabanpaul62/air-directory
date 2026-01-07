@@ -2,21 +2,20 @@ import React from "react";
 
 function Info({ Info, Description }) {
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header with decorative element */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="h-8 w-1 bg-blue-600 rounded-full"></div>
-        <h2 className="text-2xl font-bold text-gray-900">About</h2>
+      <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <div className="h-6 sm:h-8 w-1 bg-blue-600 rounded-full"></div>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">About</h2>
       </div>
 
-      <div className="space-y-6">
-        
+      <div className="space-y-4 sm:space-y-6">
         {Info && (
           <div className="prose prose-gray max-w-none">
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+            <h3 className="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2 sm:mb-3">
               Overview
             </h3>
-            <p className="text-gray-600 text-base leading-relaxed whitespace-pre-line">
+            <p className="text-gray-600 text-sm sm:text-base leading-relaxed whitespace-pre-line">
               {Info}
             </p>
           </div>
@@ -24,20 +23,20 @@ function Info({ Info, Description }) {
 
         {Description && (
           <div className="prose prose-gray max-w-none">
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+            <h3 className="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2 sm:mb-3">
               Details
             </h3>
-            <p className="text-gray-600 text-base leading-relaxed whitespace-pre-line">
+            <p className="text-gray-600 text-sm sm:text-base leading-relaxed whitespace-pre-line">
               {Description}
             </p>
           </div>
         )}
 
         {!Info && !Description && (
-          <div className="flex items-center justify-center py-12 text-center">
+          <div className="flex items-center justify-center py-8 sm:py-12 text-center">
             <div className="text-gray-400">
               <svg
-                className="mx-auto h-12 w-12 mb-3"
+                className="mx-auto h-10 w-10 sm:h-12 sm:w-12 mb-2 sm:mb-3"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -49,7 +48,9 @@ function Info({ Info, Description }) {
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <p className="text-sm font-medium">No information available</p>
+              <p className="text-xs sm:text-sm font-medium">
+                No information available
+              </p>
             </div>
           </div>
         )}

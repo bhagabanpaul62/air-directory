@@ -2,42 +2,52 @@ import DataBox from "@/components/card/dataBox";
 import Banner2 from "@/components/home/banner2";
 import DynamicBreadcrumb from "@/components/ui/DynamicBreadcrumb";
 import React from "react";
+import connectDb from "@/app/lib/conncetDb";
+import AirLine from "@/model/airLines.model";
+
+// Force dynamic rendering since this page fetches data from MongoDB
+export const dynamic = "force-dynamic";
+
+export const metadata = {
+  title: "Airlines Directory - Browse Airlines Worldwide",
+  description:
+    "Complete directory of airlines worldwide. Browse airlines by continent including Africa, Asia, Europe, North America, South America, Oceania. Find airline contact information, IATA codes, and more.",
+  keywords: [
+    "airlines directory",
+    "global airlines",
+    "airline list",
+    "IATA codes",
+    "airline contacts",
+    "international airlines",
+    "world airlines",
+  ],
+  openGraph: {
+    title: "Global Airlines Directory - OfficeLookup",
+    description:
+      "Browse and search thousands of airlines worldwide by continent and country.",
+  },
+};
 
 async function Airline() {
   try {
-    // Fix 1: Missing slash before 'api'
-    // Fix 2: Add proper fetch options
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/airLine`,
-      {
-        cache: "no-store", // Always get fresh data
-      }
-    );
+    await connectDb();
 
-    // Fix 3: Check if response is ok
-    if (!response.ok) {
-      throw new Error(`Failed to fetch airlines: ${response.status}`);
-    }
-
-    // Fix 4: Parse JSON response
-    const airlines = await response.json();
+    // Direct database query
+    const airlines = await AirLine.find({}, { Continent: 1 }).lean();
 
     // Get unique continents - simplified and more efficient
     const airLineData = [
       ...new Set(airlines.map((airline) => airline.Continent)),
     ].filter(Boolean);
 
-
-
     return (
       <div>
         <Banner2 />
-       <DynamicBreadcrumb/>
+        <DynamicBreadcrumb />
         <DataBox
           mainText="World Airline Guide"
           subtext="Select a Continent to get List of airlines"
           data={airLineData}
-          
         />
       </div>
     );

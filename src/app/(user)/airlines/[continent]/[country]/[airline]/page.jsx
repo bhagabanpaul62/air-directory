@@ -6,36 +6,87 @@ import LocationMap from "@/components/detail_page/LocationMap";
 import Quick_Fact from "@/components/detail_page/quick_Fact";
 import SocialLink from "@/components/detail_page/socialLink";
 import DynamicBreadcrumb from "@/components/ui/DynamicBreadcrumb";
+import connectDb from "@/app/lib/conncetDb";
+import AirLine from "@/model/airLines.model";
+import Office from "@/model/official.model";
+
+// Force dynamic rendering since this page fetches data from MongoDB
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }) {
+  const { airline, continent, country } = await params;
+  await connectDb();
+  const data = await AirLine.findOne({ slug: airline }).lean();
+
+  if (!data) {
+    return {
+      title: "Airline Not Found",
+    };
+  }
+
+  const title = `${data.Name} - ${data.Country} | Airline Information`;
+  const description = data.Description
+    ? data.Description.substring(0, 160)
+    : `Comprehensive information about ${
+        data.Name
+      }, including contact details, IATA code ${data.IATA || ""}, ICAO code ${
+        data.ICAO || ""
+      }, and location in ${data.City}, ${data.Country}.`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      data.Name,
+      data.IATA,
+      data.ICAO,
+      data.Country,
+      data.City,
+      "airline",
+      "aviation",
+      "flight",
+      data.Continent,
+    ].filter(Boolean),
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: data.Logo ? [{ url: data.Logo, alt: `${data.Name} logo` }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: data.Logo ? [data.Logo] : [],
+    },
+    alternates: {
+      canonical: `/airlines/${continent}/${country}/${airline}`,
+    },
+  };
+}
 
 async function Page({ params }) {
   const { airline } = await params;
   console.log("airline slug:", airline);
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/airLine/${airline}`,
-    {
-      cache: "no-store",
-    }
-  );
+  await connectDb();
 
-  const data = await res.json();
+  // Direct database query by slug
+  const data = await AirLine.findOne({ slug: airline }).lean();
 
-  // Fetch all offices to filter by country
-  const officesRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/office`,
-    {
-      cache: "no-store",
-    }
-  );
-  const allOffices = await officesRes.json();
+  if (!data) {
+    throw new Error("Airline not found");
+  }
+
+  // Fetch all offices in the same country
+  const allOffices = await Office.find(
+    { Country: data.Country },
+    { Name: 1 }
+  ).lean();
 
   // Get unique office names in the same country
   const officesInCountry = [
-    ...new Set(
-      allOffices
-        .filter((office) => office.Country === data.Country)
-        .map((office) => office.Name)
-    ),
+    ...new Set(allOffices.map((office) => office.Name)),
   ];
 
   // Create basePath for office links
@@ -43,28 +94,44 @@ async function Page({ params }) {
   const countrySlug = data.Country.toLowerCase().replace(/\s+/g, "-");
   const officeBasePath = `/office/${continentSlug}/${countrySlug}`;
 
-  // Fetch all airlines to show other airlines in same country
-  const airlinesRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/airLine`,
-    {
-      cache: "no-store",
-    }
-  );
-  const allAirlines = await airlinesRes.json();
+  // Fetch all airlines in the same country (excluding current airline)
+  const allAirlines = await AirLine.find(
+    { Country: data.Country, _id: { $ne: data._id } },
+    { Name: 1 }
+  ).lean();
 
   // Get unique airline names in the same country (excluding current airline)
-  const airlinesInCountry = [
-    ...new Set(
-      allAirlines
-        .filter((a) => a.Country === data.Country && a.Name !== data.Name)
-        .map((a) => a.Name)
-    ),
-  ];
+  const airlinesInCountry = [...new Set(allAirlines.map((a) => a.Name))];
 
   const airlineBasePath = `/airlines/${continentSlug}/${countrySlug}`;
 
+  // Structured Data for Airline
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Airline",
+    name: data.Name,
+    iataCode: data.IATA,
+    icaoCode: data.ICAO,
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: data.Country,
+      addressLocality: data.City,
+      addressRegion: data.Region,
+      streetAddress: data.Address,
+    },
+    ...(data.Phone && { telephone: data.Phone }),
+    ...(data.Email && { email: data.Email }),
+    ...(data.Website && { url: data.Website }),
+    ...(data.Logo && { logo: data.Logo }),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 -mt-10">
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Banner Section */}
       <BannerImg
         Background_Image={data.Background_Image}
@@ -142,7 +209,6 @@ async function Page({ params }) {
             basePath={officeBasePath}
           />
         </div>
-        
       </div>
     </div>
   );

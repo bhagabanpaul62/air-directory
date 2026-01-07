@@ -1,40 +1,37 @@
 import Link from "next/link";
 import Card from "@/components/card/Card";
 
-function AirPort({
-  AirPort,
-  limit = 5,
-  title = "Top Airports",
+function Office({
+  Office,
+  limit = 6,
+  title = "Top Offices",
   useCards = false,
 }) {
-  const items = Array.isArray(AirPort) ? AirPort : [];
+  const items = Array.isArray(Office) ? Office : [];
 
-  const normalized = items.map((a) => ({
+  // Normalize minimal fields we need
+  const normalized = items.map((o) => ({
     id:
-      a?._id ||
-      a?.airport_id ||
-      a?.IATA ||
-      a?.ICAO ||
-      a?.Name ||
-      Math.random().toString(36).slice(2),
-    name: a?.Name || a?.name || "Unknown Airport",
+      o?._id || o?.office_id || o?.Name || Math.random().toString(36).slice(2),
+    name: o?.Name || o?.name || "Unknown Office",
     bg:
-      a?.Background_Image ||
-      a?.background_image ||
-      a?.["Background Image"] ||
+      o?.Background_Image ||
+      o?.background_image ||
+      o?.["Background Image"] ||
       null,
     slug:
-      a?.slug ||
-      a?.Name?.toLowerCase()
+      o?.slug ||
+      o?.Name?.toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, ""),
-    continent: a?.Continent?.toLowerCase().replace(/\s+/g, "-") || "other",
+    continent: o?.Continent?.toLowerCase().replace(/\s+/g, "-") || "other",
     country:
-      a?.Country?.toLowerCase()
+      o?.Country?.toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "") || "unknown",
   }));
 
+  // Prefer entries with a background image, then alphabetical by name
   const display = normalized
     .sort(
       (a, b) => (b.bg ? 1 : 0) - (a.bg ? 1 : 0) || a.name.localeCompare(b.name)
@@ -63,54 +60,47 @@ function AirPort({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
               />
             </svg>
-            <p>No airports to display</p>
+            <p>No offices to display</p>
           </div>
         ) : useCards ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {display.slice(0, limit).map((ap) => (
+            {display.slice(0, limit).map((off) => (
               <Card
-                key={ap.id}
-                id={ap.id}
-                Name={ap.name}
+                key={off.id}
+                id={off.id}
+                Name={off.name}
                 Background_Image={
-                  AirPort.find((a) => (a._id || a.airport_id) === ap.id)
+                  Office.find((o) => (o._id || o.office_id) === off.id)
                     ?.Background_Image
                 }
                 Country={
-                  AirPort.find((a) => (a._id || a.airport_id) === ap.id)
-                    ?.Country
+                  Office.find((o) => (o._id || o.office_id) === off.id)?.Country
                 }
                 city={
-                  AirPort.find((a) => (a._id || a.airport_id) === ap.id)?.City
+                  Office.find((o) => (o._id || o.office_id) === off.id)?.City
                 }
-                IATA={
-                  AirPort.find((a) => (a._id || a.airport_id) === ap.id)?.IATA
-                }
-                ICAO={
-                  AirPort.find((a) => (a._id || a.airport_id) === ap.id)?.ICAO
-                }
-                type="Airport"
+                type="Office"
               />
             ))}
           </div>
         ) : (
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {display.map((ap) => (
+            {display.map((off) => (
               <Link
-                href={`/airports/${ap.continent}/${ap.country}/${ap.slug}`}
-                key={ap.id}
-                className="group bg-gray-50 hover:bg-emerald-50 rounded-xl border border-gray-200 hover:border-emerald-200 transition-all duration-200 cursor-pointer overflow-hidden"
-                title={ap.name}
+                href={`/office/${off.continent}/${off.country}/${off.slug}`}
+                key={off.id}
+                className="group bg-gray-50 hover:bg-purple-50 rounded-xl border border-gray-200 hover:border-purple-200 transition-all duration-200 cursor-pointer overflow-hidden"
+                title={off.name}
               >
                 <div className="relative h-24 sm:h-28 w-full bg-gradient-to-br from-gray-200 to-gray-300">
-                  {ap.bg ? (
+                  {off.bg ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={ap.bg}
-                      alt={`${ap.name} background`}
+                      src={off.bg}
+                      alt={`${off.name} background`}
                       className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
                     />
@@ -127,14 +117,14 @@ function AirPort({
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                          d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                         />
                       </svg>
                     </div>
                   )}
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-3 py-2">
                     <p className="text-white text-xs sm:text-sm font-medium line-clamp-2 leading-tight">
-                      {ap.name}
+                      {off.name}
                     </p>
                   </div>
                 </div>
@@ -147,4 +137,4 @@ function AirPort({
   );
 }
 
-export default AirPort;
+export default Office;

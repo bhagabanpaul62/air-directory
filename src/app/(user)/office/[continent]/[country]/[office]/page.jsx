@@ -6,45 +6,112 @@ import LocationMap from "@/components/detail_page/LocationMap";
 import Quick_Fact from "@/components/detail_page/quick_Fact";
 import SocialLink from "@/components/detail_page/socialLink";
 import DynamicBreadcrumb from "@/components/ui/DynamicBreadcrumb";
+import connectDb from "@/app/lib/conncetDb";
+import Office from "@/model/official.model";
+
+// Force dynamic rendering since this page fetches data from MongoDB
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }) {
+  const { office, continent, country } = await params;
+  await connectDb();
+  const data = await Office.findOne({ slug: office }).lean();
+
+  if (!data) {
+    return {
+      title: "Office Not Found",
+    };
+  }
+
+  const title = `${data.Name} - ${data.Country} | Aviation Office Information`;
+  const description = data.Description
+    ? data.Description.substring(0, 160)
+    : `Contact information for ${data.Name} aviation office in ${data.City}, ${data.Country}. Find phone numbers, email addresses, and location details.`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      data.Name,
+      data.Country,
+      data.City,
+      "aviation office",
+      "airline office",
+      "aviation services",
+      data.Continent,
+      "travel office",
+    ].filter(Boolean),
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: data.Background_Image
+        ? [{ url: data.Background_Image, alt: data.Name }]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: data.Background_Image ? [data.Background_Image] : [],
+    },
+    alternates: {
+      canonical: `/office/${continent}/${country}/${office}`,
+    },
+  };
+}
 
 async function Page({ params }) {
   const { office } = await params;
   console.log("office slug:", office);
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/office/${office}`,
-    {
-      cache: "no-store",
-    }
-  );
+  await connectDb();
 
-  const data = await res.json();
+  // Direct database query by slug
+  const data = await Office.findOne({ slug: office }).lean();
 
-  // Fetch all offices to filter by country
-  const officesRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/office`,
-    {
-      cache: "no-store",
-    }
-  );
-  const allOffices = await officesRes.json();
+  if (!data) {
+    throw new Error("Office not found");
+  }
+
+  // Fetch all offices in the same country (excluding current office)
+  const allOffices = await Office.find(
+    { Country: data.Country, _id: { $ne: data._id } },
+    { Name: 1 }
+  ).lean();
 
   // Get unique office names in the same country (excluding current office)
-  const officesInCountry = [
-    ...new Set(
-      allOffices
-        .filter((o) => o.Country === data.Country && o.Name !== data.Name)
-        .map((o) => o.Name)
-    ),
-  ];
+  const officesInCountry = [...new Set(allOffices.map((o) => o.Name))];
 
   // Create basePath for office links
   const continentSlug = data.Continent.toLowerCase().replace(/\s+/g, "-");
   const countrySlug = data.Country.toLowerCase().replace(/\s+/g, "-");
   const officeBasePath = `/office/${continentSlug}/${countrySlug}`;
 
+  // Structured Data for Office
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: data.Name,
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: data.Country,
+      addressLocality: data.City,
+      addressRegion: data.Region,
+      streetAddress: data.Address,
+    },
+    ...(data.Phone && { telephone: data.Phone }),
+    ...(data.Email && { email: data.Email }),
+    ...(data.Website && { url: data.Website }),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 -mt-10">
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Banner Section */}
       <BannerImg
         Background_Image={data.Background_Image}

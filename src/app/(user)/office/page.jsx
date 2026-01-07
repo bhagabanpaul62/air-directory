@@ -2,24 +2,38 @@ import DataBox from "@/components/card/dataBox";
 import Banner2 from "@/components/home/banner2";
 import DynamicBreadcrumb from "@/components/ui/DynamicBreadcrumb";
 import React from "react";
+import connectDb from "@/app/lib/conncetDb";
+import Office from "@/model/official.model";
 
-async function Office() {
+// Force dynamic rendering since this page fetches data from MongoDB
+export const dynamic = "force-dynamic";
+
+export const metadata = {
+  title: "Aviation Offices Directory - Browse Offices Worldwide",
+  description:
+    "Complete directory of aviation offices worldwide. Browse offices by continent including Africa, Asia, Europe, North America, South America, Oceania. Find office locations, contact information, and services.",
+  keywords: [
+    "aviation offices",
+    "airline offices",
+    "office directory",
+    "aviation services",
+    "travel offices",
+    "international offices",
+    "office locations",
+  ],
+  openGraph: {
+    title: "Global Aviation Offices Directory - OfficeLookup",
+    description:
+      "Browse and search aviation offices worldwide by continent and country.",
+  },
+};
+
+async function OfficePage() {
   try {
-    // Fetch all offices
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/office`,
-      {
-        cache: "no-store", // Always get fresh data
-      }
-    );
+    await connectDb();
 
-    // Check if response is ok
-    if (!response.ok) {
-      throw new Error(`Failed to fetch offices: ${response.status}`);
-    }
-
-    // Parse JSON response
-    const offices = await response.json();
+    // Direct database query
+    const offices = await Office.find({}, { Continent: 1 }).lean();
 
     // Get unique continents
     const officeData = [
@@ -50,4 +64,4 @@ async function Office() {
   }
 }
 
-export default Office;
+export default OfficePage;

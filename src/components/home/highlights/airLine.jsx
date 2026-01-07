@@ -26,6 +26,16 @@ function AirLine({
       a?.Logo_URL ||
       a?.["Logo URL"] ||
       null,
+    slug:
+      a?.slug ||
+      a?.Name?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, ""),
+    continent: a?.Continent?.toLowerCase().replace(/\s+/g, "-") || "other",
+    country:
+      a?.Country?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "unknown",
   }));
 
   // Prefer entries with a logo, then alphabetical by name
@@ -95,13 +105,13 @@ function AirLine({
           <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             {display.map((air) => (
               <Link
-                href={`/airLine/${air.id}`}
+                href={`/airlines/${air.continent}/${air.country}/${air.slug}`}
                 key={air.id}
-                className="group bg-gray-50 hover:bg-blue-50 rounded-xl border border-gray-200 hover:border-blue-200 transition-all duration-200 cursor-pointer"
+                className="group bg-gray-50 hover:bg-blue-50 rounded-lg sm:rounded-xl border border-gray-200 hover:border-blue-200 transition-all duration-200 cursor-pointer"
                 title={air.name}
               >
-                <div className="p-3 sm:p-4 flex flex-col items-center text-center">
-                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-white overflow-hidden ring-2 ring-gray-100 group-hover:ring-blue-200 flex items-center justify-center mb-3 transition-all duration-200">
+                <div className="p-2.5 sm:p-3 md:p-4 flex flex-col items-center text-center">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full bg-white overflow-hidden ring-2 ring-gray-100 group-hover:ring-blue-200 flex items-center justify-center mb-2 sm:mb-3 transition-all duration-200">
                     {air.logo ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -111,7 +121,7 @@ function AirLine({
                         loading="lazy"
                       />
                     ) : (
-                      <span className="text-sm sm:text-base font-bold text-blue-600 group-hover:text-blue-700">
+                      <span className="text-xs sm:text-sm md:text-base font-bold text-blue-600 group-hover:text-blue-700">
                         {air.name?.charAt(0) || "A"}
                       </span>
                     )}

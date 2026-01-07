@@ -1,6 +1,11 @@
 import DataBox from "@/components/card/dataBox";
 import Banner2 from "@/components/home/banner2";
 import DynamicBreadcrumb from "@/components/ui/DynamicBreadcrumb";
+import connectDb from "@/app/lib/conncetDb";
+import AirLine from "@/model/airLines.model";
+
+// Force dynamic rendering since this page fetches data from MongoDB
+export const dynamic = "force-dynamic";
 
 export default async function ContinentPage({ params }) {
   // Get the slug from URL (e.g., "north-america")
@@ -15,27 +20,17 @@ export default async function ContinentPage({ params }) {
   console.log("URL slug:", continent); // "north-america"
   console.log("Display name:", continentName); // "North America"
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/airLine`,
-    {
-      cache: "no-store",
-    }
+  await connectDb();
+
+  // Direct database query
+  const airlines = await AirLine.find(
+    { Continent: continentName },
+    { Country: 1 }
+  ).lean();
+
+  const cityData = [...new Set(airlines.map((item) => item.Country))].filter(
+    Boolean
   );
-  // Fix 3: Check if response is ok
-  if (!response.ok) {
-    throw new Error(`Failed to fetch airlines: ${response.status}`);
-  }
-
-  // Fix 4: Parse JSON response
-  const airlines = await response.json();
-
-  const cityData = [
-    ...new Set(
-      airlines
-        .filter((item) => item.Continent == continentName)
-        .map((item) => item.Country)
-    ),
-  ];
 
   console.log(cityData);
 

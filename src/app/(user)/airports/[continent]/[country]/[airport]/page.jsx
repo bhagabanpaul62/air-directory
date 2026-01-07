@@ -6,36 +6,90 @@ import LocationMap from "@/components/detail_page/LocationMap";
 import Quick_Fact from "@/components/detail_page/quick_Fact";
 import SocialLink from "@/components/detail_page/socialLink";
 import DynamicBreadcrumb from "@/components/ui/DynamicBreadcrumb";
+import connectDb from "@/app/lib/conncetDb";
+import AirPort from "@/model/airPort.model";
+import Office from "@/model/official.model";
+
+// Force dynamic rendering since this page fetches data from MongoDB
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }) {
+  const { airport, continent, country } = await params;
+  await connectDb();
+  const data = await AirPort.findOne({ slug: airport }).lean();
+
+  if (!data) {
+    return {
+      title: "Airport Not Found",
+    };
+  }
+
+  const title = `${data.Name} - ${data.Country} | Airport Information`;
+  const description = data.Description
+    ? data.Description.substring(0, 160)
+    : `Detailed information about ${data.Name}, including IATA code ${
+        data.IATA || ""
+      }, ICAO code ${data.ICAO || ""}, contact details, and location in ${
+        data.City
+      }, ${data.Country}.`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      data.Name,
+      data.IATA,
+      data.ICAO,
+      data.Country,
+      data.City,
+      "airport",
+      "aviation",
+      "flights",
+      data.Continent,
+      "terminal",
+    ].filter(Boolean),
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: data.Background_Image
+        ? [{ url: data.Background_Image, alt: `${data.Name}` }]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: data.Background_Image ? [data.Background_Image] : [],
+    },
+    alternates: {
+      canonical: `/airports/${continent}/${country}/${airport}`,
+    },
+  };
+}
 
 async function Page({ params }) {
   const { airport } = await params;
   console.log("airport slug:", airport);
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/airPort/${airport}`,
-    {
-      cache: "no-store",
-    }
-  );
+  await connectDb();
 
-  const data = await res.json();
+  // Direct database query by slug
+  const data = await AirPort.findOne({ slug: airport }).lean();
 
-  // Fetch all offices to filter by country
-  const officesRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/office`,
-    {
-      cache: "no-store",
-    }
-  );
-  const allOffices = await officesRes.json();
+  if (!data) {
+    throw new Error("Airport not found");
+  }
+
+  // Fetch all offices in the same country
+  const allOffices = await Office.find(
+    { Country: data.Country },
+    { Name: 1 }
+  ).lean();
 
   // Get unique office names in the same country
   const officesInCountry = [
-    ...new Set(
-      allOffices
-        .filter((office) => office.Country === data.Country)
-        .map((office) => office.Name)
-    ),
+    ...new Set(allOffices.map((office) => office.Name)),
   ];
 
   // Create basePath for office links
@@ -43,28 +97,46 @@ async function Page({ params }) {
   const countrySlug = data.Country.toLowerCase().replace(/\s+/g, "-");
   const officeBasePath = `/office/${continentSlug}/${countrySlug}`;
 
-  // Fetch all airports to show other airports in same country
-  const airportsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/airPort`,
-    {
-      cache: "no-store",
-    }
-  );
-  const allAirports = await airportsRes.json();
+  // Fetch all airports in the same country (excluding current airport)
+  const allAirports = await AirPort.find(
+    { Country: data.Country, _id: { $ne: data._id } },
+    { Name: 1 }
+  ).lean();
 
   // Get unique airport names in the same country (excluding current airport)
-  const airportsInCountry = [
-    ...new Set(
-      allAirports
-        .filter((a) => a.Country === data.Country && a.Name !== data.Name)
-        .map((a) => a.Name)
-    ),
-  ];
+  const airportsInCountry = [...new Set(allAirports.map((a) => a.Name))];
 
   const airportBasePath = `/airports/${continentSlug}/${countrySlug}`;
 
+  // Structured Data for Airport
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Airport",
+    name: data.Name,
+    iataCode: data.IATA,
+    icaoCode: data.ICAO,
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: data.Country,
+      addressLocality: data.City,
+      addressRegion: data.Region,
+      streetAddress: data.Address,
+    },
+    ...(data.Phone && { telephone: data.Phone }),
+    ...(data.Email && { email: data.Email }),
+    ...(data.Website && { url: data.Website }),
+    ...(data.Google_Maps_Link && {
+      hasMap: data.Google_Maps_Link,
+    }),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 -mt-10">
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Banner Section */}
       <BannerImg
         Background_Image={data.Background_Image}
@@ -142,7 +214,6 @@ async function Page({ params }) {
             basePath={officeBasePath}
           />
         </div>
-    
       </div>
     </div>
   );

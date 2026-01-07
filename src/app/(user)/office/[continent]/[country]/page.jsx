@@ -1,6 +1,11 @@
 import DataBox from "@/components/card/dataBox";
 import Banner2 from "@/components/home/banner2";
 import DynamicBreadcrumb from "@/components/ui/DynamicBreadcrumb";
+import connectDb from "@/app/lib/conncetDb";
+import Office from "@/model/official.model";
+
+// Force dynamic rendering since this page fetches data from MongoDB
+export const dynamic = "force-dynamic";
 
 async function Country({ params }) {
   const { country } = await params;
@@ -11,20 +16,12 @@ async function Country({ params }) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/office`,
-    {
-      cache: "no-store",
-    }
-  );
+  await connectDb();
 
-  const offices = await response.json();
+  // Direct database query
+  const offices = await Office.find({ Country: Country }, { Name: 1 }).lean();
 
-  const data = [
-    ...new Set(
-      offices.filter((item) => item.Country == Country).map((item) => item.Name)
-    ),
-  ];
+  const data = [...new Set(offices.map((item) => item.Name))].filter(Boolean);
   console.log(data);
 
   return (

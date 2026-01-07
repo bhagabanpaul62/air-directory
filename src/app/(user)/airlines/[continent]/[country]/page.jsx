@@ -1,6 +1,11 @@
 import DataBox from "@/components/card/dataBox";
 import Banner2 from "@/components/home/banner2";
 import DynamicBreadcrumb from "@/components/ui/DynamicBreadcrumb";
+import connectDb from "@/app/lib/conncetDb";
+import AirLine from "@/model/airLines.model";
+
+// Force dynamic rendering since this page fetches data from MongoDB
+export const dynamic = "force-dynamic";
 
 async function Country({ params }) {
   const { country } = await params;
@@ -11,22 +16,12 @@ async function Country({ params }) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/getData/airLine`,
-    {
-      cache: "no-store",
-    }
-  );
+  await connectDb();
 
-  const airlines = await response.json();
+  // Direct database query
+  const airlines = await AirLine.find({ Country: Country }, { Name: 1 }).lean();
 
-  const data = [
-    ...new Set(
-      airlines
-        .filter((item) => item.Country == Country)
-        .map((item) => item.Name)
-    ),
-  ];
+  const data = [...new Set(airlines.map((item) => item.Name))].filter(Boolean);
   console.log(data);
 
   return (
