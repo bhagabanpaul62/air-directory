@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -11,9 +12,13 @@ const Footer = () => {
           {/* Company Information */}
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">OL</span>
-              </div>
+              <Image
+                src="/logo-removebg-preview.png"
+                alt="OfficeLookup Logo"
+                width={32}
+                height={32}
+                className="h-8 w-auto object-contain"
+              />
               <span className="text-lg sm:text-xl font-bold text-gray-900">
                 OfficeLookup
               </span>
@@ -33,7 +38,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/airlines"
-                  className="text-gray-600 hover:text-blue-600 transition-colors text-xs sm:text-sm"
+                  className="text-gray-600 hover:text-brand transition-colors text-xs sm:text-sm"
                 >
                   Airlines
                 </Link>
@@ -41,27 +46,20 @@ const Footer = () => {
               <li>
                 <Link
                   href="/airports"
-                  className="text-gray-600 hover:text-blue-600 transition-colors text-xs sm:text-sm"
+                  className="text-gray-600 hover:text-brand transition-colors text-xs sm:text-sm"
                 >
                   Airports
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/offices"
-                  className="text-gray-600 hover:text-blue-600 transition-colors text-xs sm:text-sm"
+                  href="/office"
+                  className="text-gray-600 hover:text-brand transition-colors text-xs sm:text-sm"
                 >
                   Offices
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/directory"
-                  className="text-gray-600 hover:text-blue-600 transition-colors text-xs sm:text-sm"
-                >
-                  Browse All
-                </Link>
-              </li>
+              <li></li>
             </ul>
           </div>
 
@@ -74,23 +72,16 @@ const Footer = () => {
               <li>
                 <Link
                   href="/about"
-                  className="text-gray-600 hover:text-blue-600 transition-colors text-xs sm:text-sm"
+                  className="text-gray-600 hover:text-brand transition-colors text-xs sm:text-sm"
                 >
                   About
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-gray-600 hover:text-blue-600 transition-colors text-xs sm:text-sm"
-                >
-                  Contact
-                </Link>
-              </li>
+            
               <li>
                 <Link
                   href="/privacy"
-                  className="text-gray-600 hover:text-blue-600 transition-colors text-xs sm:text-sm"
+                  className="text-gray-600 hover:text-brand transition-colors text-xs sm:text-sm"
                 >
                   Privacy Policy
                 </Link>
@@ -98,7 +89,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/terms"
-                  className="text-gray-600 hover:text-blue-600 transition-colors text-xs sm:text-sm"
+                  className="text-gray-600 hover:text-brand transition-colors text-xs sm:text-sm"
                 >
                   Terms of Service
                 </Link>
@@ -117,6 +108,8 @@ const Footer = () => {
               <span>10,000+ Airlines</span>
               <span>•</span>
               <span>5,000+ Airports</span>
+              <span>•</span>
+              <span>2,000+ Offices</span>
               <span className="hidden sm:inline">•</span>
               <span className="hidden sm:inline">Global Coverage</span>
             </div>

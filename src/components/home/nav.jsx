@@ -1,11 +1,13 @@
-﻿"use client";
+"use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Nav() {
   const [airlinesOpen, setAirlinesOpen] = useState(false);
   const [airportsOpen, setAirportsOpen] = useState(false);
   const [officesOpen, setOfficesOpen] = useState(false);
+  const [directoryOpen, setDirectoryOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileAirlinesOpen, setMobileAirlinesOpen] = useState(false);
   const [mobileAirportsOpen, setMobileAirportsOpen] = useState(false);
@@ -47,6 +49,7 @@ export default function Nav() {
         setAirlinesOpen(false);
         setAirportsOpen(false);
         setOfficesOpen(false);
+        setDirectoryOpen(false);
       }
     };
 
@@ -84,7 +87,14 @@ export default function Nav() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
-            <span className="text-xl sm:text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors">
+            <Image
+              src="/logo-removebg-preview.png"
+              alt="OfficeLookup Logo"
+              width={40}
+              height={40}
+              className="h-10 w-auto object-contain"
+            />
+            <span className="text-xl sm:text-2xl font-bold text-brand hover:text-brand/80 transition-colors">
               OfficeLookup
             </span>
           </Link>
@@ -93,19 +103,75 @@ export default function Nav() {
           <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
             <Link
               href="/"
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              className="text-gray-700 hover:text-brand font-medium transition-colors"
             >
               Home
             </Link>
 
+            {/* Directory Dropdown */}
+            <div className="relative group">
+              <button
+                className="text-gray-700 hover:text-brand font-medium flex items-center gap-1 transition-colors"
+                onClick={() => {
+                  setDirectoryOpen(!directoryOpen);
+                  setAirlinesOpen(false);
+                  setAirportsOpen(false);
+                  setOfficesOpen(false);
+                }}
+              >
+                Directory
+                <svg
+                  className={`w-4 h-4 transition-transform ${
+                    directoryOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+              {directoryOpen && (
+                <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100 animate-fadeIn">
+                  <Link
+                    href="/airlines"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand/5 hover:text-brand transition-colors"
+                    onClick={() => setDirectoryOpen(false)}
+                  >
+                    Airlines
+                  </Link>
+                  <Link
+                    href="/airports"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand/5 hover:text-brand transition-colors"
+                    onClick={() => setDirectoryOpen(false)}
+                  >
+                    Airports
+                  </Link>
+                  <Link
+                    href="/office"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand/5 hover:text-brand transition-colors"
+                    onClick={() => setDirectoryOpen(false)}
+                  >
+                    Offices
+                  </Link>
+                </div>
+              )}
+            </div>
+
             {/* Airlines Dropdown */}
             <div className="relative group">
               <button
-                className="text-gray-700 hover:text-blue-600 font-medium flex items-center gap-1 transition-colors"
+                className="text-gray-700 hover:text-brand font-medium flex items-center gap-1 transition-colors"
                 onClick={() => {
                   setAirlinesOpen(!airlinesOpen);
                   setAirportsOpen(false);
                   setOfficesOpen(false);
+                  setDirectoryOpen(false);
                 }}
               >
                 Airlines
@@ -131,7 +197,7 @@ export default function Nav() {
                     <Link
                       key={c}
                       href={`/airlines/${c.toLowerCase().replace(/\s+/g, "-")}`}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand/5 hover:text-brand transition-colors"
                       onClick={() => setAirlinesOpen(false)}
                     >
                       {c}
@@ -144,11 +210,12 @@ export default function Nav() {
             {/* Airports Dropdown */}
             <div className="relative group">
               <button
-                className="text-gray-700 hover:text-blue-600 font-medium flex items-center gap-1 transition-colors"
+                className="text-gray-700 hover:text-brand font-medium flex items-center gap-1 transition-colors"
                 onClick={() => {
                   setAirportsOpen(!airportsOpen);
                   setAirlinesOpen(false);
                   setOfficesOpen(false);
+                  setDirectoryOpen(false);
                 }}
               >
                 Airports
@@ -174,7 +241,7 @@ export default function Nav() {
                     <Link
                       key={c}
                       href={`/airports/${c.toLowerCase().replace(/\s+/g, "-")}`}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand/5 hover:text-brand transition-colors"
                       onClick={() => setAirportsOpen(false)}
                     >
                       {c}
@@ -187,11 +254,12 @@ export default function Nav() {
             {/* Offices Dropdown */}
             <div className="relative group">
               <button
-                className="text-gray-700 hover:text-blue-600 font-medium flex items-center gap-1 transition-colors"
+                className="text-gray-700 hover:text-brand font-medium flex items-center gap-1 transition-colors"
                 onClick={() => {
                   setOfficesOpen(!officesOpen);
                   setAirlinesOpen(false);
                   setAirportsOpen(false);
+                  setDirectoryOpen(false);
                 }}
               >
                 Offices
@@ -217,7 +285,7 @@ export default function Nav() {
                     <Link
                       key={c}
                       href={`/office/${c.toLowerCase().replace(/\s+/g, "-")}`}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand/5 hover:text-brand transition-colors"
                       onClick={() => setOfficesOpen(false)}
                     >
                       {c}
@@ -226,18 +294,11 @@ export default function Nav() {
                 </div>
               )}
             </div>
-
-            <Link
-              href="/directory"
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-            >
-              Directory
-            </Link>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
             aria-expanded={mobileMenuOpen}
@@ -279,7 +340,7 @@ export default function Nav() {
             {/* Home Link */}
             <Link
               href="/"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand hover:bg-brand/5 transition-colors"
               onClick={closeMobileMenu}
             >
               Home
@@ -288,7 +349,7 @@ export default function Nav() {
             {/* Airlines Dropdown */}
             <div>
               <button
-                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand hover:bg-brand/5 transition-colors"
                 onClick={() => setMobileAirlinesOpen(!mobileAirlinesOpen)}
               >
                 <span>Airlines</span>
@@ -317,7 +378,7 @@ export default function Nav() {
                   <Link
                     key={c}
                     href={`/airlines/${c.toLowerCase().replace(/\s+/g, "-")}`}
-                    className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:text-brand hover:bg-brand/5 rounded-md transition-colors"
                     onClick={closeMobileMenu}
                   >
                     {c}
@@ -329,7 +390,7 @@ export default function Nav() {
             {/* Airports Dropdown */}
             <div>
               <button
-                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand hover:bg-brand/5 transition-colors"
                 onClick={() => setMobileAirportsOpen(!mobileAirportsOpen)}
               >
                 <span>Airports</span>
@@ -358,7 +419,7 @@ export default function Nav() {
                   <Link
                     key={c}
                     href={`/airports/${c.toLowerCase().replace(/\s+/g, "-")}`}
-                    className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:text-brand hover:bg-brand/5 rounded-md transition-colors"
                     onClick={closeMobileMenu}
                   >
                     {c}
@@ -370,7 +431,7 @@ export default function Nav() {
             {/* Offices Dropdown */}
             <div>
               <button
-                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand hover:bg-brand/5 transition-colors"
                 onClick={() => setMobileOfficesOpen(!mobileOfficesOpen)}
               >
                 <span>Offices</span>
@@ -399,7 +460,7 @@ export default function Nav() {
                   <Link
                     key={c}
                     href={`/office/${c.toLowerCase().replace(/\s+/g, "-")}`}
-                    className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:text-brand hover:bg-brand/5 rounded-md transition-colors"
                     onClick={closeMobileMenu}
                   >
                     {c}
@@ -411,7 +472,7 @@ export default function Nav() {
             {/* Directory Link */}
             <Link
               href="/directory"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand hover:bg-brand/5 transition-colors"
               onClick={closeMobileMenu}
             >
               Directory
