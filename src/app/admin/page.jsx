@@ -11,6 +11,7 @@ export default function AdminPage() {
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // 'add' or 'edit'
+  const [selectedItems, setSelectedItems] = useState(new Set());
 
   // CSV Upload State
   const [file, setFile] = useState(null);
@@ -25,8 +26,8 @@ export default function AdminPage() {
         activeTab === "airlines"
           ? "/api/admin/airlines"
           : activeTab === "airports"
-          ? "/api/admin/airports"
-          : "/api/admin/offices";
+            ? "/api/admin/airports"
+            : "/api/admin/offices";
       const params = new URLSearchParams({
         page: page.toString(),
         limit: "10",
@@ -41,8 +42,8 @@ export default function AdminPage() {
           activeTab === "airlines"
             ? result.airlines
             : activeTab === "airports"
-            ? result.airports
-            : result.offices
+              ? result.airports
+              : result.offices,
         );
         setPagination(result.pagination);
       }
@@ -57,6 +58,7 @@ export default function AdminPage() {
   useEffect(() => {
     setCurrentPage(1);
     setSearchTerm("");
+    setSelectedItems(new Set());
     fetchData(1, "");
   }, [activeTab]);
 
@@ -85,8 +87,8 @@ export default function AdminPage() {
         activeTab === "airlines"
           ? `/api/admin/airlines/${id}`
           : activeTab === "airports"
-          ? `/api/admin/airports/${id}`
-          : `/api/admin/offices/${id}`;
+            ? `/api/admin/airports/${id}`
+            : `/api/admin/offices/${id}`;
       const response = await fetch(endpoint, { method: "DELETE" });
 
       if (response.ok) {
@@ -94,6 +96,38 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error("Error deleting item:", error);
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = async () => {
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedItems.size} selected items?`,
+      )
+    )
+      return;
+
+    try {
+      const endpoint =
+        activeTab === "airlines"
+          ? "/api/admin/airlines/bulk-delete"
+          : activeTab === "airports"
+            ? "/api/admin/airports/bulk-delete"
+            : "/api/admin/offices/bulk-delete";
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedItems) }),
+      });
+
+      if (response.ok) {
+        setSelectedItems(new Set());
+        fetchData(currentPage, searchTerm);
+      }
+    } catch (error) {
+      console.error("Error bulk deleting items:", error);
     }
   };
 
@@ -111,8 +145,8 @@ export default function AdminPage() {
         activeTab === "airlines"
           ? "/api/admin/airlines"
           : activeTab === "airports"
-          ? "/api/admin/airports"
-          : "/api/admin/offices";
+            ? "/api/admin/airports"
+            : "/api/admin/offices";
 
       let response;
       if (modalMode === "add") {
@@ -174,7 +208,7 @@ export default function AdminPage() {
 
       if (response.ok) {
         setUploadMessage(
-          `Success: rows=${result.count}, upserted=${result.upserted}, modified=${result.modified}`
+          `Success: rows=${result.count}, upserted=${result.upserted}, modified=${result.modified}`,
         );
         setFile(null);
         fetchData(currentPage, searchTerm);
@@ -251,6 +285,16 @@ export default function AdminPage() {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             />
 
+            {/* Bulk Delete Button */}
+            {selectedItems.size > 0 && (
+              <button
+                onClick={handleBulkDelete}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete Selected ({selectedItems.size})
+              </button>
+            )}
+
             {/* Add Button */}
             <button
               onClick={() => openModal("add")}
@@ -260,8 +304,8 @@ export default function AdminPage() {
               {activeTab === "airlines"
                 ? "Airline"
                 : activeTab === "airports"
-                ? "Airport"
-                : "Office"}
+                  ? "Airport"
+                  : "Office"}
             </button>
           </div>
 
@@ -310,6 +354,23 @@ export default function AdminPage() {
               type={activeTab}
               onEdit={(item) => openModal("edit", item)}
               onDelete={handleDelete}
+              selectedItems={selectedItems}
+              onSelect={(id) => {
+                const newSelected = new Set(selectedItems);
+                if (newSelected.has(id)) {
+                  newSelected.delete(id);
+                } else {
+                  newSelected.add(id);
+                }
+                setSelectedItems(newSelected);
+              }}
+              onSelectAll={(e) => {
+                if (e.target.checked) {
+                  setSelectedItems(new Set(data.map((item) => item._id)));
+                } else {
+                  setSelectedItems(new Set());
+                }
+              }}
             />
           )}
 
@@ -320,14 +381,14 @@ export default function AdminPage() {
                 Showing {(currentPage - 1) * pagination.itemsPerPage + 1} to{" "}
                 {Math.min(
                   currentPage * pagination.itemsPerPage,
-                  pagination.totalItems
+                  pagination.totalItems,
                 )}{" "}
                 of {pagination.totalItems} results
               </div>
               <div className="flex gap-1">
                 {Array.from(
                   { length: pagination.totalPages },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map((page) => (
                   <button
                     key={page}
@@ -363,7 +424,15 @@ export default function AdminPage() {
 }
 
 // Data Table Component
-function DataTable({ data, type, onEdit, onDelete }) {
+function DataTable({
+  data,
+  type,
+  onEdit,
+  onDelete,
+  selectedItems,
+  onSelect,
+  onSelectAll,
+}) {
   const columns =
     type === "airlines"
       ? [
@@ -376,23 +445,23 @@ function DataTable({ data, type, onEdit, onDelete }) {
           { key: "Website", label: "Website" },
         ]
       : type === "airports"
-      ? [
-          { key: "airport_id", label: "ID" },
-          { key: "Name", label: "Name" },
-          { key: "IATA", label: "IATA" },
-          { key: "ICAO", label: "ICAO" },
-          { key: "Country", label: "Country" },
-          { key: "City", label: "City" },
-          { key: "Website", label: "Website" },
-        ]
-      : [
-          { key: "office_id", label: "ID" },
-          { key: "Name", label: "Name" },
-          { key: "Type", label: "Type" },
-          { key: "Country", label: "Country" },
-          { key: "City", label: "City" },
-          { key: "Website", label: "Website" },
-        ];
+        ? [
+            { key: "airport_id", label: "ID" },
+            { key: "Name", label: "Name" },
+            { key: "IATA", label: "IATA" },
+            { key: "ICAO", label: "ICAO" },
+            { key: "Country", label: "Country" },
+            { key: "City", label: "City" },
+            { key: "Website", label: "Website" },
+          ]
+        : [
+            { key: "office_id", label: "ID" },
+            { key: "Name", label: "Name" },
+            { key: "Type", label: "Type" },
+            { key: "Country", label: "Country" },
+            { key: "City", label: "City" },
+            { key: "Website", label: "Website" },
+          ];
 
   if (data.length === 0) {
     return <div className="p-8 text-center text-black">No {type} found</div>;
@@ -403,6 +472,14 @@ function DataTable({ data, type, onEdit, onDelete }) {
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
+            <th className="px-6 py-3 text-left">
+              <input
+                type="checkbox"
+                onChange={onSelectAll}
+                checked={data.length > 0 && selectedItems.size === data.length}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+            </th>
             {columns.map((column) => (
               <th
                 key={column.key}
@@ -419,6 +496,14 @@ function DataTable({ data, type, onEdit, onDelete }) {
         <tbody className="bg-white divide-y divide-gray-200">
           {data.map((item) => (
             <tr key={item._id} className="hover:bg-gray-50">
+              <td className="px-6 py-4 whitespace-nowrap">
+                <input
+                  type="checkbox"
+                  checked={selectedItems.has(item._id)}
+                  onChange={() => onSelect(item._id)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+              </td>
               {columns.map((column) => (
                 <td
                   key={column.key}
@@ -453,7 +538,7 @@ function DataTable({ data, type, onEdit, onDelete }) {
                   </button>
                   <button
                     onClick={() => onDelete(item._id)}
-                    className="bg-red-100 text-red-800 px-3 py-1 rounded-md hover:bg-red-200 transition-colors"
+                    className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors"
                   >
                     Delete
                   </button>
@@ -552,8 +637,8 @@ function Modal({ isOpen, onClose, type, mode, item, onSave }) {
               {type === "airlines"
                 ? "Airline"
                 : type === "airports"
-                ? "Airport"
-                : "Office"}
+                  ? "Airport"
+                  : "Office"}
             </h2>
             <button
               onClick={onClose}
@@ -643,8 +728,8 @@ function Modal({ isOpen, onClose, type, mode, item, onSave }) {
                     type === "airlines"
                       ? "Airline"
                       : type === "airports"
-                      ? "Airport"
-                      : "Office"
+                        ? "Airport"
+                        : "Office"
                   } Name`}
                   value={formData.Name || ""}
                   onChange={handleChange}

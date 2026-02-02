@@ -6,7 +6,7 @@ export async function PUT(request, { params }) {
   await connectDb();
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const data = await request.json();
 
     const airport = await AirPort.findByIdAndUpdate(id, data, {
@@ -26,7 +26,7 @@ export async function PUT(request, { params }) {
     console.error("Error updating airport:", error);
     return NextResponse.json(
       { error: "Failed to update airport" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -35,7 +35,7 @@ export async function DELETE(request, { params }) {
   await connectDb();
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const airport = await AirPort.findByIdAndDelete(id);
 
@@ -50,7 +50,7 @@ export async function DELETE(request, { params }) {
     console.error("Error deleting airport:", error);
     return NextResponse.json(
       { error: "Failed to delete airport" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -59,7 +59,7 @@ export async function GET(request, { params }) {
   await connectDb();
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const airport = await AirPort.findById(id);
 
@@ -72,7 +72,7 @@ export async function GET(request, { params }) {
     console.error("Error fetching airport:", error);
     return NextResponse.json(
       { error: "Failed to fetch airport" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

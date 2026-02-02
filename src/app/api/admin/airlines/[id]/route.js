@@ -6,7 +6,7 @@ export async function PUT(request, { params }) {
   await connectDb();
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const data = await request.json();
 
     const airline = await AirLine.findByIdAndUpdate(id, data, {
@@ -26,7 +26,7 @@ export async function PUT(request, { params }) {
     console.error("Error updating airline:", error);
     return NextResponse.json(
       { error: "Failed to update airline" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -35,7 +35,7 @@ export async function DELETE(request, { params }) {
   await connectDb();
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const airline = await AirLine.findByIdAndDelete(id);
 
@@ -50,7 +50,7 @@ export async function DELETE(request, { params }) {
     console.error("Error deleting airline:", error);
     return NextResponse.json(
       { error: "Failed to delete airline" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -59,7 +59,7 @@ export async function GET(request, { params }) {
   await connectDb();
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const airline = await AirLine.findById(id);
 
@@ -72,7 +72,7 @@ export async function GET(request, { params }) {
     console.error("Error fetching airline:", error);
     return NextResponse.json(
       { error: "Failed to fetch airline" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

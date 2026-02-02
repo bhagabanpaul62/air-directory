@@ -5,19 +5,17 @@ services:
     container_name: nextjs_app
     build: .
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"   # ONLY localhost (Nginx will proxy)
     env_file:
       - .env.production
     depends_on:
       - mongo
-    restart: always
+    restart: unless-stopped
 
   mongo:
     image: mongo:7
     container_name: mongodb
-    restart: always
-    ports:
-      - "127.0.0.1:27017:27017"   # NOT public
+    restart: unless-stopped
     volumes:
       - mongo_data:/data/db
     environment:
