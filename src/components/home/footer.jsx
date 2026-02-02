@@ -1,8 +1,36 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [stats, setStats] = useState({
+    airlines: "10,000+",
+    airports: "5,000+",
+    offices: "2,000+",
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/stats");
+        if (response.ok) {
+          const data = await response.json();
+          setStats({
+            airlines: data.airlines
+              ? data.airlines.toLocaleString()
+              : "10,000+",
+            airports: data.airports ? data.airports.toLocaleString() : "5,000+",
+            offices: data.offices ? data.offices.toLocaleString() : "2,000+",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch stats", error);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <footer className="bg-gray-50 border-t border-gray-200">
@@ -77,7 +105,7 @@ const Footer = () => {
                   About
                 </Link>
               </li>
-            
+
               <li>
                 <Link
                   href="/privacy"
@@ -105,11 +133,11 @@ const Footer = () => {
               © {currentYear} OfficeLookup. All rights reserved.
             </p>
             <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-500 flex-wrap justify-center">
-              <span>10,000+ Airlines</span>
+              <span>{stats.airlines} Airlines</span>
               <span>•</span>
-              <span>5,000+ Airports</span>
+              <span>{stats.airports} Airports</span>
               <span>•</span>
-              <span>2,000+ Offices</span>
+              <span>{stats.offices} Offices</span>
               <span className="hidden sm:inline">•</span>
               <span className="hidden sm:inline">Global Coverage</span>
             </div>
