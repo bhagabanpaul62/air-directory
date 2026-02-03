@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDb from "@/app/lib/conncetDb";
 import AirPort from "@/model/airPort.model";
+import { submitToIndexNow, getAirportUrl } from "@/lib/indexNow";
 
 export async function PUT(request, { params }) {
   await connectDb();
@@ -16,6 +17,12 @@ export async function PUT(request, { params }) {
 
     if (!airport) {
       return NextResponse.json({ error: "Airport not found" }, { status: 404 });
+    }
+
+    // Submit to IndexNow
+    const url = getAirportUrl(airport);
+    if (url) {
+      await submitToIndexNow([url]);
     }
 
     return NextResponse.json({
@@ -41,6 +48,12 @@ export async function DELETE(request, { params }) {
 
     if (!airport) {
       return NextResponse.json({ error: "Airport not found" }, { status: 404 });
+    }
+
+    // Submit to IndexNow
+    const url = getAirportUrl(airport);
+    if (url) {
+      await submitToIndexNow([url]);
     }
 
     return NextResponse.json({

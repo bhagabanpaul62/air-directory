@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDb from "@/app/lib/conncetDb";
 import Office from "@/model/official.model";
+import { submitToIndexNow, getOfficeUrl } from "@/lib/indexNow";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ export async function GET(request, { params }) {
     if (!office) {
       return NextResponse.json(
         { message: "Office not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -24,7 +25,7 @@ export async function GET(request, { params }) {
     console.error("Error fetching office:", error);
     return NextResponse.json(
       { message: "Error fetching office", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -44,8 +45,14 @@ export async function PUT(request, { params }) {
     if (!office) {
       return NextResponse.json(
         { message: "Office not found" },
-        { status: 404 }
+        { status: 404 },
       );
+    }
+
+    // Submit to IndexNow
+    const url = getOfficeUrl(office);
+    if (url) {
+      await submitToIndexNow([url]);
     }
 
     return NextResponse.json({
@@ -56,7 +63,7 @@ export async function PUT(request, { params }) {
     console.error("Error updating office:", error);
     return NextResponse.json(
       { message: "Error updating office", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -72,8 +79,14 @@ export async function DELETE(request, { params }) {
     if (!office) {
       return NextResponse.json(
         { message: "Office not found" },
-        { status: 404 }
+        { status: 404 },
       );
+    }
+
+    // Submit to IndexNow
+    const url = getOfficeUrl(office);
+    if (url) {
+      await submitToIndexNow([url]);
     }
 
     return NextResponse.json({
@@ -83,7 +96,7 @@ export async function DELETE(request, { params }) {
     console.error("Error deleting office:", error);
     return NextResponse.json(
       { message: "Error deleting office", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

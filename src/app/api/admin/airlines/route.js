@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDb from "@/app/lib/conncetDb";
 import AirLine from "@/model/airLines.model";
+import { submitToIndexNow, getAirlineUrl } from "@/lib/indexNow";
 
 export async function GET(request) {
   await connectDb();
@@ -45,7 +46,7 @@ export async function GET(request) {
     console.error("Error fetching airlines:", error);
     return NextResponse.json(
       { error: "Failed to fetch airlines" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -58,6 +59,12 @@ export async function POST(request) {
     const airline = new AirLine(data);
     await airline.save();
 
+    // Submit to IndexNow
+    const url = getAirlineUrl(airline);
+    if (url) {
+      await submitToIndexNow([url]);
+    }
+
     return NextResponse.json({
       message: "Airline created successfully",
       airline,
@@ -66,7 +73,7 @@ export async function POST(request) {
     console.error("Error creating airline:", error);
     return NextResponse.json(
       { error: "Failed to create airline" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

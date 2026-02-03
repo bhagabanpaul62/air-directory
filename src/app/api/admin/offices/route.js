@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDb from "@/app/lib/conncetDb";
 import Office from "@/model/official.model";
+import { submitToIndexNow, getOfficeUrl } from "@/lib/indexNow";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +47,7 @@ export async function GET(request) {
     console.error("Error fetching offices:", error);
     return NextResponse.json(
       { message: "Error fetching offices", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -60,15 +61,21 @@ export async function POST(request) {
     const office = new Office(body);
     await office.save();
 
+    // Submit to IndexNow
+    const url = getOfficeUrl(office);
+    if (url) {
+      await submitToIndexNow([url]);
+    }
+
     return NextResponse.json(
       { message: "Office created successfully", office },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating office:", error);
     return NextResponse.json(
       { message: "Error creating office", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -87,7 +94,7 @@ export async function DELETE() {
     console.error("Error deleting offices:", error);
     return NextResponse.json(
       { message: "Error deleting offices", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

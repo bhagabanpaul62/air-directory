@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDb from "@/app/lib/conncetDb";
 import AirPort from "@/model/airPort.model";
+import { submitToIndexNow, getAirportUrl } from "@/lib/indexNow";
 
 export async function GET(request) {
   await connectDb();
@@ -57,6 +58,12 @@ export async function POST(request) {
     const data = await request.json();
     const airport = new AirPort(data);
     await airport.save();
+
+    // Submit to IndexNow
+    const url = getAirportUrl(airport);
+    if (url) {
+      await submitToIndexNow([url]);
+    }
 
     return NextResponse.json({
       message: "Airport created successfully",
