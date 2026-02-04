@@ -7,7 +7,7 @@ export async function submitToIndexNow(urlList) {
     process.env.NEXT_PUBLIC_BASE_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
     "https://officelookup.com";
-  const key = "00652c9ec8ab42e89d3bce8e3640af1f";
+  const key = "f9b82ef857cb4f41a7c479565ab8d75e";
   const keyLocation = `${host}/${key}.txt`;
 
   // Filter out any invalid URLs or non-absolute URLs if necessary
